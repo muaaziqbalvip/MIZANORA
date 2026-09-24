@@ -25,16 +25,17 @@ import {
   getFunctions, connectFunctionsEmulator
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-functions.js";
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com"
+  apiKey: "AIzaSyAX_Pt55gCgztQN16FU4fFdctrYhtCsIqM",
+  authDomain: "mizanora-market.firebaseapp.com",
+  databaseURL: "https://mizanora-market-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mizanora-market",
+  storageBucket: "mizanora-market.firebasestorage.app",
+  messagingSenderId: "798291284486",
+  appId: "1:798291284486:web:be3af55e98ad3dfe3fe987",
+  measurementId: "G-KCETRC0RF1"
 };
-
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
