@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>MIZANORA — Shop Smart. Shop Halal.</title>
+<meta name="description" content="MIZANORA is a premium halal e-commerce store. Quality products, fair prices, and a shopping experience built on trust. Cash on delivery across Pakistan." />
+
+<!-- Open Graph -->
+<meta property="og:title" content="MIZANORA — Everything You Need, In One Place" />
+<meta property="og:description" content="Shop smart. Shop halal. Shop MIZANORA. Premium products with fair, transparent dealing." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="/assets/icons/logo-mark.png" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="MIZANORA — Everything You Need, In One Place" />
+<meta name="twitter:description" content="Shop smart. Shop halal. Shop MIZANORA." />
+
+<link rel="canonical" href="https://mizanora.example.com/" />
+<link rel="icon" href="/assets/icons/logo-mark.png" />
+<link rel="apple-touch-icon" href="/assets/icons/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0A0A0A" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="/css/tokens.css" />
+<link rel="stylesheet" href="/css/base.css" />
+<link rel="stylesheet" href="/css/home.css" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "MIZANORA",
+  "url": "https://mizanora.example.com",
+  "logo": "https://mizanora.example.com/assets/icons/logo-mark.png",
+  "description": "Premium halal e-commerce store built on trust, fairness, and quality."
+}
+</script>
+</head>
+<body>
+
+<!-- ================= LOADING SCREEN ================= -->
+<div class="mz-loader" id="app-loader">
+  <img src="/assets/icons/logo-mark.png" alt="" />
+  <div class="mz-loader__word">MIZANORA</div>
+  <div class="mz-loader__tag">Shop Smart. Shop Halal.</div>
+</div>
+
+<!-- ================= NAVBAR ================= -->
+<!-- ================= ANNOUNCEMENT BAR (CMS-driven, Phase 6) ================= -->
+<div id="announcement-bar" style="display:none;"></div>
+
+<header class="mz-nav">
+  <div class="mz-container mz-nav__inner">
+    <a href="/" class="mz-nav__logo">
+      <img src="/assets/icons/logo-mark.png" alt="MIZANORA" />
+      <span class="mz-nav__logo-text">MIZANORA</span>
+    </a>
+
+    <nav class="mz-nav__links" aria-label="Main navigation">
+      <a href="/">Home</a>
+      <a href="/shop">Shop</a>
+      <a href="/categories">Categories</a>
+      <a href="/new-arrivals">New Arrivals</a>
+      <a href="/best-sellers">Best Sellers</a>
+      <a href="/offers">Offers</a>
+    </nav>
+
+    <div class="mz-nav__actions">
+      <a href="/search" class="mz-icon-btn" aria-label="Search" id="search-icon-btn"></a>
+      <a href="/wishlist" class="mz-icon-btn" aria-label="Wishlist" id="wishlist-icon-btn"></a>
+      <a href="/cart" class="mz-icon-btn" aria-label="Cart">
+        <span id="cart-icon-slot"></span>
+        <span class="mz-cart-badge" id="cart-badge" style="display:none;">0</span>
+      </a>
+      <a href="/account" class="mz-icon-btn" aria-label="Account" id="account-icon-btn"></a>
+      <button class="mz-icon-btn mz-nav__hamburger" id="hamburger-btn" aria-label="Menu"></button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="mz-hero">
+  <div class="mz-hero__particles" id="hero-particles"></div>
+  <div class="mz-container mz-hero__inner">
+    <div class="mz-hero__content">
+      <img src="/assets/icons/logo-mark.png" alt="" class="mz-hero__logo-mark" />
+      <div class="mz-hero__eyebrow"><span class="mz-dot"></span> HALAL &nbsp;•&nbsp; TRUSTED &nbsp;•&nbsp; FOR A BETTER TOMORROW</div>
+      <h1>Everything You Need. <em>One Trusted Place.</em></h1>
+      <p class="mz-hero__sub">Quality products, fair prices, and a shopping experience you can trust — only at MIZANORA.</p>
+      <div class="mz-hero__ctas">
+        <a href="/shop" class="mz-btn mz-btn--primary mz-btn--lg">Shop Now</a>
+        <a href="/categories" class="mz-btn mz-btn--outline mz-btn--lg">Explore Categories</a>
+      </div>
+    </div>
+    <div class="mz-hero__visual">
+      <img src="/assets/icons/logo-full.png" alt="MIZANORA" style="object-fit:contain;background:#0A0A0A;" />
+    </div>
+  </div>
+</section>
+
+<!-- ================= TRUST BADGES ================= -->
+<section class="mz-trust">
+  <div class="mz-container mz-trust__grid">
+    <div class="mz-trust__item"><span id="ic-shield"></span><span>100% Halal</span></div>
+    <div class="mz-trust__item"><span id="ic-truck"></span><span>Fast Delivery</span></div>
+    <div class="mz-trust__item"><span id="ic-lock"></span><span>Secure Payment</span></div>
+    <div class="mz-trust__item"><span id="ic-refresh"></span><span>Easy Returns</span></div>
+  </div>
+</section>
+
+<!-- ================= CATEGORIES ================= -->
+<section class="mz-section">
+  <div class="mz-container">
+    <div class="mz-section__head">
+      <h2>Shop by Category</h2>
+      <a href="/categories" class="mz-section__link">View All <span id="ic-arrow-cat"></span></a>
+    </div>
+    <div class="mz-cat-grid" id="category-grid">
+      <div class="mz-skeleton" style="height:110px;"></div><div class="mz-skeleton" style="height:110px;"></div>
+      <div class="mz-skeleton" style="height:110px;"></div><div class="mz-skeleton" style="height:110px;"></div>
+      <div class="mz-skeleton" style="height:110px;"></div><div class="mz-skeleton" style="height:110px;"></div>
+      <div class="mz-skeleton" style="height:110px;"></div><div class="mz-skeleton" style="height:110px;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURED PRODUCTS ================= -->
+<section class="mz-section">
+  <div class="mz-container">
+    <div class="mz-section__head">
+      <h2>Featured Products</h2>
+      <a href="/shop?filter=featured" class="mz-section__link">View All <span id="ic-arrow-feat"></span></a>
+    </div>
+    <div class="mz-product-grid" id="featured-grid">
+      <div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BEST SELLERS ================= -->
+<section class="mz-section">
+  <div class="mz-container">
+    <div class="mz-section__head">
+      <h2>Best Sellers</h2>
+      <a href="/best-sellers" class="mz-section__link">View All <span id="ic-arrow-best"></span></a>
+    </div>
+    <div class="mz-product-grid" id="bestsellers-grid">
+      <div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NEW ARRIVALS ================= -->
+<section class="mz-section">
+  <div class="mz-container">
+    <div class="mz-section__head">
+      <h2>New Arrivals</h2>
+      <a href="/new-arrivals" class="mz-section__link">View All <span id="ic-arrow-new"></span></a>
+    </div>
+    <div class="mz-product-grid" id="new-arrivals-grid">
+      <div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+<div class="mz-skeleton" style="aspect-ratio:0.75;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHY MIZANORA ================= -->
+<section class="mz-section">
+  <div class="mz-container">
+    <div class="mz-divider" style="margin-bottom:var(--mz-space-3);"><span id="ic-sparkle"></span></div>
+    <div class="mz-section__head" style="justify-content:center;text-align:center;">
+      <h2 style="width:100%;">Why MIZANORA</h2>
+    </div>
+    <div class="mz-why-grid">
+      <div class="mz-why-card mz-reveal">
+        <span id="ic-why-shield"></span>
+        <h3>Honest Dealing</h3>
+        <p>MIZAN means balance — every price, every product, every order is handled fairly and transparently.</p>
+      </div>
+      <div class="mz-why-card mz-reveal">
+        <span id="ic-why-truck"></span>
+        <h3>Reliable Delivery</h3>
+        <p>Cash on delivery across Pakistan, with real-time tracking from placed to delivered.</p>
+      </div>
+      <div class="mz-why-card mz-reveal">
+        <span id="ic-why-lock"></span>
+        <h3>Secure by Design</h3>
+        <p>Your data and orders are protected with strict, audited access controls at every layer.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CUSTOMER REVIEWS ================= -->
+<section class="mz-section">
+  <div class="mz-container">
+    <div class="mz-section__head">
+      <h2>What Customers Say</h2>
+    </div>
+    <div class="mz-reviews-track" id="reviews-track">
+      <div class="mz-skeleton" style="flex:0 0 300px;height:180px;"></div>
+<div class="mz-skeleton" style="flex:0 0 300px;height:180px;"></div>
+<div class="mz-skeleton" style="flex:0 0 300px;height:180px;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NEWSLETTER ================= -->
+<section class="mz-section">
+  <div class="mz-container">
+    <div class="mz-newsletter mz-reveal">
+      <div class="mz-newsletter__inner">
+        <h2>Stay in the loop</h2>
+        <p>New arrivals, offers, and honest deals — straight to your inbox.</p>
+        <form class="mz-newsletter__form" id="newsletter-form">
+          <input type="email" placeholder="you@example.com" required aria-label="Email address" />
+          <button type="submit" class="mz-btn mz-btn--primary">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="mz-footer">
+  <div class="mz-container">
+    <div class="mz-footer__grid">
+      <div class="mz-footer__brand">
+        <img src="/assets/icons/logo-full.png" alt="MIZANORA" />
+        <p>Shop smart. Shop halal. Shop MIZANORA. A premium store built on trust, fairness, and quality.</p>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/shop">All Products</a></li>
+          <li><a href="/categories">Categories</a></li>
+          <li><a href="/offers">Offers</a></li>
+          <li><a href="/track-order">Track Order</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About MIZANORA</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Policies</h4>
+        <ul>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms &amp; Conditions</a></li>
+          <li><a href="/returns">Return &amp; Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mz-footer__bottom">
+      <span>© 2026 MIZANORA. All rights reserved.</span>
+      <span>Made with fairness, for everyone.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= MOBILE BOTTOM NAV ================= -->
+<nav class="mz-bottom-nav" aria-label="Mobile navigation">
+  <div class="mz-bottom-nav__inner">
+    <a href="/" class="is-active"><span id="ic-bn-home"></span>Home</a>
+    <a href="/shop"><span id="ic-bn-shop"></span>Shop</a>
+    <a href="/categories"><span id="ic-bn-cat"></span>Categories</a>
+    <a href="/wishlist"><span id="ic-bn-wish"></span>Wishlist</a>
+    <a href="/account"><span id="ic-bn-acc"></span>Account</a>
+  </div>
+</nav>
+
+<script type="module" src="/js/env.example.js"></script>
+<script type="module">
+  import { icon } from "/js/utils/icons.js";
+  const map = {
+    "search-icon-btn": "search", "cart-icon-slot": "cart", "wishlist-icon-btn": "heart", "account-icon-btn": "user",
+    "ic-shield": "shield", "ic-truck": "truck", "ic-lock": "lock", "ic-refresh": "refresh",
+    "ic-arrow-cat": "arrowRight", "ic-arrow-feat": "arrowRight", "ic-arrow-best": "arrowRight", "ic-arrow-new": "arrowRight",
+    "ic-sparkle": "sparkle",
+    "ic-why-shield": "shield", "ic-why-truck": "truck", "ic-why-lock": "lock",
+    "ic-bn-home": "home", "ic-bn-shop": "grid", "ic-bn-cat": "grid", "ic-bn-wish": "heart", "ic-bn-acc": "user",
+    "hamburger-btn": "menu"
+  };
+  for (const [id, name] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = icon(name);
+  }
+</script>
+<script type="module" src="/js/pages/home.js"></script>
+
+</body>
+</html>

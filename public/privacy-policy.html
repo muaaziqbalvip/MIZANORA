@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Privacy Policy — MIZANORA</title>
+<meta name="description" content="How MIZANORA collects, uses, and protects your personal information." />
+<link rel="canonical" href="https://mizanora.example.com/privacy-policy" />
+<link rel="icon" href="/assets/icons/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0A0A0A" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/tokens.css" />
+<link rel="stylesheet" href="/css/base.css" />
+<link rel="stylesheet" href="/css/home.css" />
+<link rel="stylesheet" href="/css/static.css" />
+</head>
+<body>
+
+<header id="site-header"></header>
+
+<div class="mz-static">
+  <h1>Privacy Policy</h1>
+  <p class="mz-static__updated">Last updated: September 2026</p>
+
+  <p>This Privacy Policy explains how MIZANORA ("we", "us") collects, uses, and protects information when you use our website and services.</p>
+
+  <h2>Information We Collect</h2>
+  <ul>
+    <li><strong>Order information:</strong> name, phone number, delivery address, city, and province, provided at checkout.</li>
+    <li><strong>Account information:</strong> if you create an account, your name and email address.</li>
+    <li><strong>Optional information:</strong> email address at checkout, order notes, and product reviews you choose to submit.</li>
+  </ul>
+  <p>We do not collect payment card details — MIZANORA currently operates on a Cash on Delivery basis only.</p>
+
+  <h2>How We Use Your Information</h2>
+  <ul>
+    <li>To process and deliver your orders</li>
+    <li>To communicate with you about order status</li>
+    <li>To provide customer support</li>
+    <li>To improve our products and services</li>
+  </ul>
+
+  <h2>How We Protect Your Information</h2>
+  <p>Your data is stored using Firebase, with access controlled by strict security rules — customers can only access their own order and account data, and administrative functions are restricted to verified admin accounts.</p>
+
+  <h2>Your Choices</h2>
+  <p>You can request a copy of your data, ask us to correct it, or request account deletion by contacting us at the email listed on our <a href="/contact">Contact page</a>.</p>
+
+  <h2>Guest Checkout</h2>
+  <p>You are never required to create an account to place an order. Guest orders are looked up only via a matching Order ID and phone number.</p>
+
+  <h2>Changes to This Policy</h2>
+  <p>We may update this policy from time to time. Continued use of MIZANORA after changes means you accept the revised policy.</p>
+</div>
+
+<footer id="site-footer"></footer>
+<nav id="site-bottom-nav"></nav>
+
+<script type="module" src="/js/env.example.js"></script>
+<script type="module">
+  import { renderPageChrome } from "/js/page-chrome.js";
+  import { initShell } from "/js/shared.js";
+  renderPageChrome("");
+  initShell();
+</script>
+
+</body>
+</html>
