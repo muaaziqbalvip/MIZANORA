@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Your Cart — MIZANORA</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/assets/icons/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0A0A0A" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="/css/tokens.css" />
+<link rel="stylesheet" href="/css/base.css" />
+<link rel="stylesheet" href="/css/home.css" />
+<link rel="stylesheet" href="/css/product.css" />
+<link rel="stylesheet" href="/css/cart.css" />
+</head>
+<body>
+
+<header class="mz-nav">
+  <div class="mz-container mz-nav__inner">
+    <a href="/" class="mz-nav__logo">
+      <img src="/assets/icons/logo-mark.png" alt="MIZANORA" />
+      <span class="mz-nav__logo-text">MIZANORA</span>
+    </a>
+    <nav class="mz-nav__links" aria-label="Main navigation">
+      <a href="/">Home</a>
+      <a href="/shop">Shop</a>
+      <a href="/categories">Categories</a>
+      <a href="/new-arrivals">New Arrivals</a>
+      <a href="/best-sellers">Best Sellers</a>
+      <a href="/offers">Offers</a>
+    </nav>
+    <div class="mz-nav__actions">
+      <a href="/search" class="mz-icon-btn" aria-label="Search" id="search-icon-btn"></a>
+      <a href="/wishlist" class="mz-icon-btn" aria-label="Wishlist" id="wishlist-icon-btn"></a>
+      <a href="/cart" class="mz-icon-btn" aria-label="Cart" style="color:var(--mz-gold);">
+        <span id="cart-icon-slot"></span>
+        <span class="mz-cart-badge" id="cart-badge" style="display:none;">0</span>
+      </a>
+      <a href="/account" class="mz-icon-btn" aria-label="Account" id="account-icon-btn"></a>
+      <button class="mz-icon-btn mz-nav__hamburger" id="hamburger-btn" aria-label="Menu"></button>
+    </div>
+  </div>
+</header>
+
+<div class="mz-container mz-cart-layout" id="cart-layout">
+  <div class="mz-skeleton" style="height:300px;"></div>
+  <div class="mz-skeleton" style="height:300px;"></div>
+</div>
+
+<footer class="mz-footer">
+  <div class="mz-container">
+    <div class="mz-footer__grid">
+      <div class="mz-footer__brand">
+        <img src="/assets/icons/logo-full.png" alt="MIZANORA" />
+        <p>Shop smart. Shop halal. Shop MIZANORA. A premium store built on trust, fairness, and quality.</p>
+      </div>
+      <div>
+        <h4>Shop</h4>
+        <ul>
+          <li><a href="/shop">All Products</a></li>
+          <li><a href="/categories">Categories</a></li>
+          <li><a href="/offers">Offers</a></li>
+          <li><a href="/track-order">Track Order</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About MIZANORA</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Policies</h4>
+        <ul>
+          <li><a href="/privacy-policy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms &amp; Conditions</a></li>
+          <li><a href="/returns">Return &amp; Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="mz-footer__bottom">
+      <span>© 2026 MIZANORA. All rights reserved.</span>
+      <span>Made with fairness, for everyone.</span>
+    </div>
+  </div>
+</footer>
+
+<nav class="mz-bottom-nav" aria-label="Mobile navigation">
+  <div class="mz-bottom-nav__inner">
+    <a href="/"><span id="ic-bn-home"></span>Home</a>
+    <a href="/shop"><span id="ic-bn-shop"></span>Shop</a>
+    <a href="/categories"><span id="ic-bn-cat"></span>Categories</a>
+    <a href="/wishlist"><span id="ic-bn-wish"></span>Wishlist</a>
+    <a href="/account"><span id="ic-bn-acc"></span>Account</a>
+  </div>
+</nav>
+
+<script type="module" src="/js/env.example.js"></script>
+<script type="module" src="/js/pages/cart.js"></script>
+
+</body>
+</html>

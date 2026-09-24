@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Order Confirmed — MIZANORA</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/assets/icons/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0A0A0A" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="/css/tokens.css" />
+<link rel="stylesheet" href="/css/base.css" />
+<link rel="stylesheet" href="/css/home.css" />
+<link rel="stylesheet" href="/css/cart.css" />
+</head>
+<body>
+
+<header class="mz-nav">
+  <div class="mz-container mz-nav__inner">
+    <a href="/" class="mz-nav__logo">
+      <img src="/assets/icons/logo-mark.png" alt="MIZANORA" />
+      <span class="mz-nav__logo-text">MIZANORA</span>
+    </a>
+    <nav class="mz-nav__links" aria-label="Main navigation"></nav>
+    <div class="mz-nav__actions"></div>
+  </div>
+</header>
+
+<div class="mz-container" id="confirmation-root">
+  <div class="mz-confirmation">
+    <div class="mz-confirmation__icon" id="check-icon"></div>
+    <h1>Order Placed Successfully!</h1>
+    <p style="color:var(--mz-text-dim);">Thank you for shopping with MIZANORA. We'll deliver your order soon — pay in cash when it arrives.</p>
+    <div class="mz-confirmation__order-id" id="order-id-display">MZN-—</div>
+
+    <div id="summary-host">
+      <div class="mz-skeleton" style="height:160px;"></div>
+    </div>
+
+    <div class="mz-confirmation__actions">
+      <a href="/track-order" class="mz-btn mz-btn--outline">Track This Order</a>
+      <a href="/shop" class="mz-btn mz-btn--primary">Continue Shopping</a>
+    </div>
+  </div>
+</div>
+
+<footer class="mz-footer" style="margin-bottom:0;">
+  <div class="mz-container">
+    <div class="mz-footer__bottom" style="border-top:1px solid var(--mz-border-soft);">
+      <span>© 2026 MIZANORA. All rights reserved.</span>
+      <span>Made with fairness, for everyone.</span>
+    </div>
+  </div>
+</footer>
+
+<script type="module">
+  document.getElementById("check-icon").innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+</script>
+<script type="module" src="/js/pages/order-success.js"></script>
+
+</body>
+</html>

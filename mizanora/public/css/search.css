@@ -1,0 +1,63 @@
+/* MIZANORA — Search page */
+
+.mz-search-hero {
+  padding: var(--mz-space-6) 0 var(--mz-space-5);
+  border-bottom: 1px solid var(--mz-border-soft);
+}
+.mz-search-box {
+  position: relative;
+  max-width: 640px;
+}
+.mz-search-box input {
+  width: 100%;
+  padding: 1rem 1.1rem 1rem 3rem;
+  border-radius: var(--mz-radius-pill);
+  border: 1px solid var(--mz-border);
+  background: var(--mz-surface);
+  color: var(--mz-text);
+  font-size: var(--mz-text-base);
+}
+.mz-search-box input:focus { outline: none; border-color: var(--mz-gold); }
+.mz-search-box svg {
+  position: absolute;
+  left: 1.1rem; top: 50%;
+  transform: translateY(-50%);
+  width: 18px; height: 18px;
+  color: var(--mz-text-faint);
+}
+.mz-search-box__clear {
+  position: absolute;
+  right: 0.9rem; top: 50%;
+  transform: translateY(-50%);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: none;
+  align-items: center; justify-content: center;
+  color: var(--mz-text-faint);
+  background: var(--mz-surface-raised);
+}
+.mz-search-box__clear.is-visible { display: flex; }
+
+.mz-search-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mz-space-2);
+  margin-top: var(--mz-space-4);
+}
+.mz-search-chip {
+  font-size: var(--mz-text-xs);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--mz-radius-pill);
+  border: 1px solid var(--mz-border);
+  color: var(--mz-text-dim);
+  transition: border-color var(--mz-duration-fast), color var(--mz-duration-fast);
+}
+.mz-search-chip:hover { border-color: var(--mz-gold); color: var(--mz-gold); }
+
+.mz-search-section-label {
+  font-size: var(--mz-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mz-text-faint);
+  margin: var(--mz-space-6) 0 var(--mz-space-3);
+}

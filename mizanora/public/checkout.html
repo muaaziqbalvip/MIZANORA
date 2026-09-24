@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Checkout — MIZANORA</title>
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/assets/icons/logo-mark.png" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#0A0A0A" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="/css/tokens.css" />
+<link rel="stylesheet" href="/css/base.css" />
+<link rel="stylesheet" href="/css/home.css" />
+<link rel="stylesheet" href="/css/product.css" />
+<link rel="stylesheet" href="/css/cart.css" />
+</head>
+<body>
+
+<header class="mz-nav">
+  <div class="mz-container mz-nav__inner">
+    <a href="/" class="mz-nav__logo">
+      <img src="/assets/icons/logo-mark.png" alt="MIZANORA" />
+      <span class="mz-nav__logo-text">MIZANORA</span>
+    </a>
+    <nav class="mz-nav__links" aria-label="Main navigation">
+      <span style="color:var(--mz-text-dim);font-size:0.85rem;">Secure Checkout</span>
+    </nav>
+    <div class="mz-nav__actions">
+      <span style="font-size:0.8rem;color:var(--mz-text-faint);display:flex;align-items:center;gap:6px;" id="secure-badge"></span>
+    </div>
+  </div>
+</header>
+
+<div class="mz-container">
+  <h1 class="mz-page-title" style="margin-top:var(--mz-space-5);">Checkout</h1>
+</div>
+
+<div class="mz-container mz-cart-layout" id="checkout-layout">
+  <div id="checkout-form-host">
+    <div class="mz-skeleton" style="height:400px;"></div>
+  </div>
+  <div id="checkout-summary-host">
+    <div class="mz-skeleton" style="height:300px;"></div>
+  </div>
+</div>
+
+<footer class="mz-footer" style="margin-bottom:0;">
+  <div class="mz-container">
+    <div class="mz-footer__bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 MIZANORA. All rights reserved.</span>
+      <span>Secure checkout · Cash on Delivery</span>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="/js/env.example.js"></script>
+<script type="module">
+  document.getElementById("secure-badge").innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--mz-gold);"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg> Secure';
+</script>
+<script type="module" src="/js/pages/checkout.js"></script>
+
+</body>
+</html>

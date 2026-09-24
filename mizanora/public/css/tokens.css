@@ -1,0 +1,93 @@
+/* =========================================================
+   MIZANORA — Design Tokens
+   Premium black + metallic gold, restrained Islamic-geometric
+   accents. Gold is earned — reserved for price, CTAs, and the
+   geometric divider motif — not spread across every element.
+   ========================================================= */
+
+:root {
+  /* ---- Color: base ---- */
+  --mz-black:        #0A0A0A;   /* page background */
+  --mz-surface:       #131315;   /* card / panel background */
+  --mz-surface-raised:#1B1B1E;   /* elevated panel (modals, nav) */
+  --mz-border:        #2A2A2E;   /* hairline borders on dark */
+  --mz-border-soft:   #202023;
+
+  /* ---- Color: gold family (from logo) ---- */
+  --mz-gold:          #D4AF6A;   /* primary — matches logo metallic tone */
+  --mz-gold-bright:   #E8C989;   /* hover / highlight state */
+  --mz-bronze:        #8A6E3D;   /* secondary / muted accent */
+  --mz-gold-glow:     rgba(212, 175, 106, 0.18);
+
+  /* ---- Color: text ---- */
+  --mz-text:          #F5F1E8;   /* warm white, primary text */
+  --mz-text-dim:      #A8A29A;   /* secondary text */
+  --mz-text-faint:    #6B665F;   /* tertiary / placeholder */
+
+  /* ---- Color: semantic ---- */
+  --mz-success:       #4E9F6E;
+  --mz-danger:        #C1543C;
+  --mz-warning:       #D4AF6A;
+
+  /* ---- Type ---- */
+  --mz-font-display: 'Cormorant Garamond', 'Georgia', serif;
+  --mz-font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --mz-text-xs:   0.75rem;
+  --mz-text-sm:   0.875rem;
+  --mz-text-base: 1rem;
+  --mz-text-lg:   1.125rem;
+  --mz-text-xl:   1.375rem;
+  --mz-text-2xl:  1.75rem;
+  --mz-text-3xl:  2.25rem;
+  --mz-text-4xl:  3rem;
+  --mz-text-5xl:  4rem;
+
+  /* ---- Spacing (4px base) ---- */
+  --mz-space-1: 0.25rem;
+  --mz-space-2: 0.5rem;
+  --mz-space-3: 0.75rem;
+  --mz-space-4: 1rem;
+  --mz-space-5: 1.5rem;
+  --mz-space-6: 2rem;
+  --mz-space-7: 3rem;
+  --mz-space-8: 4rem;
+  --mz-space-9: 6rem;
+
+  /* ---- Radius ---- */
+  --mz-radius-sm: 4px;
+  --mz-radius-md: 8px;
+  --mz-radius-lg: 14px;
+  --mz-radius-pill: 999px;
+
+  /* ---- Shadow / glow ---- */
+  --mz-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --mz-shadow-gold-sm: 0 0 0 1px rgba(212, 175, 106, 0.25);
+  --mz-shadow-gold-glow: 0 0 32px var(--mz-gold-glow);
+
+  /* ---- Motion ---- */
+  --mz-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mz-duration-fast: 150ms;
+  --mz-duration-base: 280ms;
+  --mz-duration-slow: 480ms;
+
+  /* ---- Layout ---- */
+  --mz-container-max: 1280px;
+  --mz-nav-height: 72px;
+  --mz-nav-height-mobile: 60px;
+  --mz-bottom-nav-height: 64px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mz-duration-fast: 0ms;
+    --mz-duration-base: 0ms;
+    --mz-duration-slow: 0ms;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

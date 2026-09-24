@@ -1,0 +1,138 @@
+/* MIZANORA — Base reset + global utilities */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--mz-black);
+  color: var(--mz-text);
+  font-family: var(--mz-font-body);
+  font-size: var(--mz-text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+ul { list-style: none; margin: 0; padding: 0; }
+
+h1, h2, h3, h4 {
+  font-family: var(--mz-font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+p { margin: 0; }
+
+::selection { background: var(--mz-gold); color: var(--mz-black); }
+
+:focus-visible {
+  outline: 2px solid var(--mz-gold);
+  outline-offset: 3px;
+  border-radius: var(--mz-radius-sm);
+}
+
+.mz-container {
+  max-width: var(--mz-container-max);
+  margin: 0 auto;
+  padding: 0 var(--mz-space-5);
+}
+
+@media (max-width: 480px) {
+  .mz-container { padding: 0 var(--mz-space-4); }
+}
+
+.mz-visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+/* ---- Buttons ---- */
+.mz-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mz-space-2);
+  padding: 0.85rem 1.75rem;
+  border-radius: var(--mz-radius-pill);
+  font-size: var(--mz-text-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  transition: transform var(--mz-duration-fast) var(--mz-ease),
+              box-shadow var(--mz-duration-fast) var(--mz-ease),
+              background var(--mz-duration-fast) var(--mz-ease);
+  white-space: nowrap;
+}
+.mz-btn:active { transform: scale(0.97); }
+
+.mz-btn--primary {
+  background: linear-gradient(135deg, var(--mz-gold-bright), var(--mz-gold) 60%, var(--mz-bronze));
+  color: var(--mz-black);
+}
+.mz-btn--primary:hover { box-shadow: var(--mz-shadow-gold-glow); }
+
+.mz-btn--outline {
+  background: transparent;
+  border-color: var(--mz-border);
+  color: var(--mz-text);
+}
+.mz-btn--outline:hover { border-color: var(--mz-gold); color: var(--mz-gold); }
+
+.mz-btn--ghost {
+  background: transparent;
+  color: var(--mz-text-dim);
+}
+.mz-btn--ghost:hover { color: var(--mz-gold); }
+
+.mz-btn--full { width: 100%; }
+.mz-btn--lg { padding: 1.1rem 2.25rem; font-size: var(--mz-text-base); }
+
+/* ---- Skeleton loader ---- */
+.mz-skeleton {
+  background: linear-gradient(90deg, var(--mz-surface) 25%, var(--mz-surface-raised) 50%, var(--mz-surface) 75%);
+  background-size: 200% 100%;
+  animation: mz-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--mz-radius-md);
+}
+@keyframes mz-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---- Geometric divider motif (the one recurring signature element) ---- */
+.mz-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mz-space-3);
+  color: var(--mz-bronze);
+}
+.mz-divider::before, .mz-divider::after {
+  content: '';
+  height: 1px;
+  width: 48px;
+  background: linear-gradient(90deg, transparent, var(--mz-border));
+}
+.mz-divider::after { background: linear-gradient(90deg, var(--mz-border), transparent); }
+
+/* ---- Scroll reveal (single orchestrated pattern, not per-card default) ---- */
+.mz-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--mz-duration-slow) var(--mz-ease),
+              transform var(--mz-duration-slow) var(--mz-ease);
+}
+.mz-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

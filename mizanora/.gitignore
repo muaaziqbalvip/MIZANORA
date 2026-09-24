@@ -1,0 +1,7 @@
+.env
+public/js/env.js
+node_modules/
+.firebase/
+firebase-debug.log
+.DS_Store
+scripts/service-account.json
