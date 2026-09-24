@@ -26,5 +26,10 @@ jobs:
         npm install
         cd ..
     
+    - name: Create Firebase config
+      env:
+        FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      run: echo "$FIREBASE_SERVICE_ACCOUNT" > firebase-key.json
+    
     - name: Deploy to Firebase
-      run: firebase deploy --only firestore:rules,firestore:indexes,database,functions --token "${{ secrets.FIREBASE_TOKEN }}"
+      run: firebase deploy --only firestore:rules,firestore:indexes,database,functions --key-file firebase-key.json
