@@ -10,7 +10,7 @@
 // Those requests always go to the network; only the shell is cached.
 // =====================================================================
 
-const CACHE_NAME = "mizanora-shell-v1";
+const CACHE_NAME = "mizanora-shell-v2";
 
 const SHELL_ASSETS = [
   "/",
@@ -21,7 +21,10 @@ const SHELL_ASSETS = [
   "/css/base.css",
   "/css/home.css",
   "/assets/icons/logo-mark.png",
-  "/assets/icons/logo-full.png"
+  "/assets/icons/logo-mark-192.png",
+  "/assets/icons/logo-mark-512.png",
+  "/assets/icons/logo-full.png",
+  "/assets/img/hero-banner.jpg"
 ];
 
 self.addEventListener("install", (event) => {

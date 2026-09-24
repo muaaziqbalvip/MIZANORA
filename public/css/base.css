@@ -77,10 +77,28 @@ p { margin: 0; }
 .mz-btn:active { transform: scale(0.97); }
 
 .mz-btn--primary {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--mz-gold-bright), var(--mz-gold) 60%, var(--mz-bronze));
   color: var(--mz-black);
 }
 .mz-btn--primary:hover { box-shadow: var(--mz-shadow-gold-glow); }
+.mz-btn--primary::after {
+  content: '';
+  position: absolute; top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+  transform: skewX(-20deg);
+  animation: mz-btn-shine 4.5s ease-in-out infinite;
+}
+@keyframes mz-btn-shine {
+  0% { left: -60%; }
+  35% { left: 130%; }
+  100% { left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mz-btn--primary::after { animation: none; }
+}
 
 .mz-btn--outline {
   background: transparent;
