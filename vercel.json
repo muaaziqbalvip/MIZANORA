@@ -1,0 +1,30 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/category/:slug*", "destination": "/category.html" },
+    { "source": "/product/:slug*", "destination": "/product.html" },
+    { "source": "/shop", "destination": "/shop.html" },
+    { "source": "/search", "destination": "/search.html" },
+    { "source": "/cart", "destination": "/cart.html" },
+    { "source": "/checkout", "destination": "/checkout.html" },
+    { "source": "/order-success", "destination": "/order-success.html" },
+    { "source": "/track-order", "destination": "/track-order.html" },
+    { "source": "/account", "destination": "/account.html" },
+    { "source": "/admin", "destination": "/admin/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)\\.(jpg|jpeg|png|webp|svg)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, immutable" }]
+    },
+    {
+      "source": "/(.*)\\.(css|js)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    },
+    {
+      "source": "/service-worker.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
+}
