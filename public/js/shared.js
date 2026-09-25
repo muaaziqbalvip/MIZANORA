@@ -61,10 +61,28 @@ export function initShell() {
   registerServiceWorker();
 }
 
+let swReloadedOnce = false;
+
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
-  // Registered once per page load; the browser dedupes if already registered.
-  navigator.serviceWorker.register("/service-worker.js").catch((err) => {
+
+  // If a newer service worker takes control (i.e. we just shipped an
+  // update), reload once automatically so the visitor isn't stuck on a
+  // stale cached shell — this is what was making Chrome show old/slow
+  // content while a never-visited browser loaded the latest version fine.
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (swReloadedOnce) return;
+    swReloadedOnce = true;
+    location.reload();
+  });
+
+  navigator.serviceWorker.register("/service-worker.js").then((reg) => {
+    // Check for a waiting/updated worker immediately and periodically,
+    // so an already-open tab picks up a new deploy without the user
+    // having to manually clear cache.
+    reg.update().catch(() => {});
+    setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000); // hourly
+  }).catch((err) => {
     console.warn("[MIZANORA] Service worker registration failed:", err);
   });
 }

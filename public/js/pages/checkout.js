@@ -10,6 +10,10 @@
 import { getCart } from "../services/cart-store.js";
 import { createOrder } from "../services/order-service.js";
 import { formatPKR } from "../utils/format.js";
+import { getCurrentLocationAddress } from "../utils/geolocation.js";
+import { icon } from "../utils/icons.js";
+import { getCurrentUser } from "../services/auth-service.js";
+import { getAddresses } from "../services/customer-service.js";
 import { initShell, escapeHtml } from "../shared.js";
 
 const SHIPPING_FEE = 200; // preview only — see cart.js note
@@ -57,6 +61,7 @@ function renderForm() {
   if (!host) return;
   host.innerHTML = `
     <div class="mz-checkout-alert" id="checkout-alert"></div>
+    <div id="saved-addresses-host"></div>
     <form class="mz-checkout-form" id="checkout-form" novalidate>
       <div class="mz-form-group" data-field="customerName">
         <label>Full Name <span class="required">*</span></label>
@@ -79,8 +84,14 @@ function renderForm() {
 
       <div class="mz-form-group" data-field="address">
         <label>Complete Address <span class="required">*</span></label>
-        <textarea name="address" autocomplete="street-address" required></textarea>
+        <div class="mz-address-input-row">
+          <textarea name="address" autocomplete="street-address" required></textarea>
+          <button type="button" class="mz-locate-btn" id="locate-btn">
+            <span id="ic-locate"></span> Use my current location
+          </button>
+        </div>
         <span class="mz-form-error">Please enter your delivery address.</span>
+        <span class="mz-locate-status" id="locate-status"></span>
       </div>
 
       <div class="mz-form-row">
@@ -124,7 +135,91 @@ function renderForm() {
   `;
 
   document.getElementById("ic-cash").innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>`;
+  document.getElementById("ic-locate").innerHTML = icon("pin") || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-11.5A7 7 0 105 9.5C5 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>`;
+  bindLocateButton();
+  renderSavedAddresses();
 }
+
+async function renderSavedAddresses() {
+  const host = document.getElementById("saved-addresses-host");
+  const user = getCurrentUser();
+  if (!user || !host) return;
+
+  const addresses = await getAddresses(user.uid).catch(() => []);
+  if (addresses.length === 0) return;
+
+  host.innerHTML = `
+    <div class="mz-saved-addresses">
+      <label>Choose a saved address</label>
+      <div class="mz-saved-addresses__list">
+        ${addresses.map((a) => `
+          <button type="button" class="mz-saved-address-chip" data-address-id="${a.id}">
+            <strong>${escapeHtml(a.label || "Address")}</strong>
+            <span>${escapeHtml(a.address)}, ${escapeHtml(a.city)}</span>
+          </button>
+        `).join("")}
+        <button type="button" class="mz-saved-address-chip is-new" data-address-id="__new">+ Enter a new address</button>
+      </div>
+    </div>
+  `;
+
+  host.querySelectorAll("[data-address-id]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      host.querySelectorAll(".mz-saved-address-chip").forEach((c) => c.classList.remove("is-selected"));
+      chip.classList.add("is-selected");
+      const id = chip.dataset.addressId;
+      const form = document.getElementById("checkout-form");
+      if (id === "__new") {
+        form.querySelector('[name="address"]').value = "";
+        form.querySelector('[name="city"]').value = "";
+        form.querySelector('[name="province"]').value = "";
+        return;
+      }
+      const a = addresses.find((x) => x.id === id);
+      if (!a) return;
+      form.querySelector('[name="address"]').value = a.address || "";
+      form.querySelector('[name="city"]').value = a.city || "";
+      if (a.postalCode) form.querySelector('[name="postalCode"]').value = a.postalCode;
+      const provinceSelect = form.querySelector('[name="province"]');
+      if (a.province && [...provinceSelect.options].some((o) => o.value === a.province)) {
+        provinceSelect.value = a.province;
+      }
+    });
+  });
+
+  // Auto-select the default address, if any.
+  const defaultChip = host.querySelector(`[data-address-id="${addresses.find((a) => a.isDefault)?.id}"]`);
+  defaultChip?.click();
+}
+
+function bindLocateButton() {
+  const btn = document.getElementById("locate-btn");
+  const status = document.getElementById("locate-status");
+  if (!btn) return;
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.textContent = "Detecting your location…";
+    status.className = "mz-locate-status is-loading";
+    try {
+      const loc = await getCurrentLocationAddress();
+      const form = document.getElementById("checkout-form");
+      if (loc.address) form.querySelector('[name="address"]').value = loc.address;
+      if (loc.city) form.querySelector('[name="city"]').value = loc.city;
+      if (loc.postalCode) form.querySelector('[name="postalCode"]').value = loc.postalCode;
+      const provinceSelect = form.querySelector('[name="province"]');
+      if (loc.province && [...provinceSelect.options].some((o) => o.value === loc.province)) {
+        provinceSelect.value = loc.province;
+      }
+      status.textContent = "✓ Address filled from your location — please double-check it below.";
+      status.className = "mz-locate-status is-success";
+    } catch (err) {
+      status.textContent = err.message;
+      status.className = "mz-locate-status is-error";
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
 function renderSummary(items) {
   const host = document.getElementById("checkout-summary-host");
@@ -159,43 +254,80 @@ function renderSummary(items) {
 
 function bindForm(items) {
   const form = document.getElementById("checkout-form");
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
     hideAlert();
-
     if (!validateForm(form)) return;
-
-    const submitBtn = document.getElementById("place-order-btn");
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Placing Order…";
-
-    const formData = new FormData(form);
-    const payload = {
-      items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
-      customerName: formData.get("customerName").trim(),
-      phone: formData.get("phone").trim(),
-      email: formData.get("email")?.trim() || null,
-      address: formData.get("address").trim(),
-      city: formData.get("city").trim(),
-      province: formData.get("province"),
-      postalCode: formData.get("postalCode")?.trim() || null,
-      notes: formData.get("notes")?.trim() || null,
-      couponCode: couponState?.code || null
-    };
-
-    try {
-      const result = await createOrder(payload);
-      // Order placed — clear the cart and redirect to confirmation.
-      localStorage.removeItem("mizanora_cart_v1");
-      sessionStorage.setItem("mizanora_last_order", JSON.stringify(result));
-      location.href = `/order-success?id=${encodeURIComponent(result.orderId)}`;
-    } catch (err) {
-      console.error("[MIZANORA] createOrder failed:", err);
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Place Order";
-      showAlert(mapOrderError(err));
-    }
+    openAddressConfirmModal(form, items);
   });
+}
+
+function openAddressConfirmModal(form, items) {
+  const fd = new FormData(form);
+  const overlay = document.createElement("div");
+  overlay.className = "mz-modal-overlay is-open";
+  overlay.innerHTML = `
+    <div class="mz-modal" role="dialog" aria-modal="true" aria-label="Confirm delivery address">
+      <h3>Confirm Your Delivery Address</h3>
+      <p class="mz-modal__hint">Please double-check this before we place your order — it can't be changed once submitted.</p>
+      <div class="mz-modal__address">
+        <strong>${escapeHtml(fd.get("customerName").trim())}</strong> · ${escapeHtml(fd.get("phone").trim())}<br/>
+        ${escapeHtml(fd.get("address").trim())}<br/>
+        ${escapeHtml(fd.get("city").trim())}, ${escapeHtml(fd.get("province"))}
+        ${fd.get("postalCode")?.trim() ? ` — ${escapeHtml(fd.get("postalCode").trim())}` : ""}
+      </div>
+      <div class="mz-modal__actions">
+        <button type="button" class="mz-btn mz-btn--ghost" id="modal-edit-btn">Edit Address</button>
+        <button type="button" class="mz-btn mz-btn--primary" id="modal-confirm-btn">Confirm &amp; Place Order</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.body.style.overflow = "hidden";
+
+  const close = () => {
+    overlay.remove();
+    document.body.style.overflow = "";
+  };
+
+  overlay.querySelector("#modal-edit-btn").addEventListener("click", close);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector("#modal-confirm-btn").addEventListener("click", async () => {
+    close();
+    await submitOrder(form, items);
+  });
+}
+
+async function submitOrder(form, items) {
+  const submitBtn = document.getElementById("place-order-btn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Placing Order…";
+
+  const formData = new FormData(form);
+  const payload = {
+    items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+    customerName: formData.get("customerName").trim(),
+    phone: formData.get("phone").trim(),
+    email: formData.get("email")?.trim() || null,
+    address: formData.get("address").trim(),
+    city: formData.get("city").trim(),
+    province: formData.get("province"),
+    postalCode: formData.get("postalCode")?.trim() || null,
+    notes: formData.get("notes")?.trim() || null,
+    couponCode: couponState?.code || null
+  };
+
+  try {
+    const result = await createOrder(payload);
+    localStorage.removeItem("mizanora_cart_v1");
+    sessionStorage.setItem("mizanora_last_order", JSON.stringify(result));
+    location.href = `/order-success?id=${encodeURIComponent(result.orderId)}`;
+  } catch (err) {
+    console.error("[MIZANORA] createOrder failed:", err);
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Place Order";
+    showAlert(mapOrderError(err));
+  }
 }
 
 function validateForm(form) {

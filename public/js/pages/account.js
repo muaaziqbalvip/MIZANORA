@@ -15,6 +15,7 @@ import { getWishlist } from "../services/wishlist-store.js";
 import { getCustomerNotifications } from "../services/notification-service.js";
 import { icon } from "../utils/icons.js";
 import { formatPKR, initials } from "../utils/format.js";
+import { getCurrentLocationAddress } from "../utils/geolocation.js";
 import { initShell, escapeHtml, productCardHtml, bindProductCardEvents, emptyStateHtml } from "../shared.js";
 
 let currentUser = null;
@@ -389,11 +390,40 @@ async function renderAddressesPanel(user) {
           <div class="mz-form-group"><label>Label</label><input type="text" name="label" placeholder="Home, Office…" required /></div>
           <div class="mz-form-group"><label>City</label><input type="text" name="city" required /></div>
         </div>
-        <div class="mz-form-group"><label>Address</label><textarea name="address" required></textarea></div>
+        <div class="mz-form-group">
+          <label>Address</label>
+          <div class="mz-address-input-row">
+            <textarea name="address" required></textarea>
+            <button type="button" class="mz-locate-btn" id="account-locate-btn">📍 Use my current location</button>
+          </div>
+          <span class="mz-locate-status" id="account-locate-status"></span>
+        </div>
         <div class="mz-form-group"><label>Province</label><input type="text" name="province" required /></div>
         <button type="submit" class="mz-btn mz-btn--outline">Add Address</button>
       </form>
     `;
+
+    document.getElementById("account-locate-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("account-locate-btn");
+      const status = document.getElementById("account-locate-status");
+      btn.disabled = true;
+      status.textContent = "Detecting your location…";
+      status.className = "mz-locate-status is-loading";
+      try {
+        const loc = await getCurrentLocationAddress();
+        const form = document.getElementById("add-address-form");
+        if (loc.address) form.querySelector('[name="address"]').value = loc.address;
+        if (loc.city) form.querySelector('[name="city"]').value = loc.city;
+        if (loc.province) form.querySelector('[name="province"]').value = loc.province;
+        status.textContent = "✓ Address filled — please double-check it.";
+        status.className = "mz-locate-status is-success";
+      } catch (err) {
+        status.textContent = err.message;
+        status.className = "mz-locate-status is-error";
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
     host.querySelectorAll("[data-delete-address]").forEach((btn) => {
       btn.addEventListener("click", async () => {

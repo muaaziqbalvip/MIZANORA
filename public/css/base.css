@@ -155,3 +155,66 @@ p { margin: 0; }
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ================= LOCATE BUTTON (checkout / account address) ================= */
+.mz-address-input-row { display: flex; flex-direction: column; gap: var(--mz-space-2); }
+.mz-locate-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  align-self: flex-start;
+  background: none; border: 1px dashed rgba(212,175,106,0.4);
+  color: var(--mz-gold); font-size: 0.82rem; font-weight: 600;
+  padding: 7px 12px; border-radius: var(--mz-radius-sm);
+  cursor: pointer; transition: background var(--mz-duration-fast), border-color var(--mz-duration-fast);
+}
+.mz-locate-btn svg { width: 15px; height: 15px; }
+.mz-locate-btn:hover { background: rgba(212,175,106,0.08); border-color: var(--mz-gold); }
+.mz-locate-btn:disabled { opacity: 0.6; cursor: wait; }
+.mz-locate-status { font-size: 0.78rem; min-height: 1em; }
+.mz-locate-status.is-loading { color: var(--mz-text-dim); }
+.mz-locate-status.is-success { color: #7fbf7f; }
+.mz-locate-status.is-error { color: #e08585; }
+
+/* ================= CONFIRM MODAL (order/address confirmation) ================= */
+.mz-modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--mz-space-5);
+  opacity: 0; animation: mz-modal-fade 0.18s ease forwards;
+}
+@keyframes mz-modal-fade { to { opacity: 1; } }
+.mz-modal {
+  background: var(--mz-surface-raised); border: 1px solid var(--mz-border-soft);
+  border-radius: var(--mz-radius-lg); padding: var(--mz-space-6);
+  max-width: 420px; width: 100%;
+  box-shadow: var(--mz-shadow-card);
+}
+.mz-modal h3 { margin: 0 0 var(--mz-space-2); font-family: var(--mz-font-display); }
+.mz-modal__hint { color: var(--mz-text-dim); font-size: 0.85rem; margin-bottom: var(--mz-space-4); }
+.mz-modal__address {
+  background: var(--mz-surface); border: 1px solid var(--mz-border-soft);
+  border-radius: var(--mz-radius-md); padding: var(--mz-space-4);
+  font-size: 0.9rem; line-height: 1.7; margin-bottom: var(--mz-space-5);
+}
+.mz-modal__actions { display: flex; gap: var(--mz-space-3); justify-content: flex-end; }
+@media (max-width: 480px) {
+  .mz-modal__actions { flex-direction: column-reverse; }
+  .mz-modal__actions .mz-btn { width: 100%; }
+}
+
+/* ================= SAVED ADDRESS PICKER (checkout) ================= */
+.mz-saved-addresses { margin-bottom: var(--mz-space-5); }
+.mz-saved-addresses > label { display: block; font-size: 0.85rem; color: var(--mz-text-dim); margin-bottom: var(--mz-space-3); }
+.mz-saved-addresses__list { display: flex; flex-wrap: wrap; gap: var(--mz-space-3); }
+.mz-saved-address-chip {
+  text-align: left; background: var(--mz-surface); border: 1px solid var(--mz-border-soft);
+  border-radius: var(--mz-radius-md); padding: 10px 14px; cursor: pointer;
+  min-width: 160px; max-width: 240px;
+  display: flex; flex-direction: column; gap: 2px;
+  transition: border-color var(--mz-duration-fast), background var(--mz-duration-fast);
+}
+.mz-saved-address-chip strong { font-size: 0.85rem; color: var(--mz-text); }
+.mz-saved-address-chip span { font-size: 0.75rem; color: var(--mz-text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mz-saved-address-chip:hover { border-color: var(--mz-gold); }
+.mz-saved-address-chip.is-selected { border-color: var(--mz-gold); background: rgba(212,175,106,0.08); }
+.mz-saved-address-chip.is-new { align-items: center; justify-content: center; color: var(--mz-gold); font-size: 0.85rem; }

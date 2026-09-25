@@ -14,7 +14,7 @@
 // Those requests always go to the network; only the shell + SDK is cached.
 // =====================================================================
 
-const CACHE_NAME = "mizanora-shell-v3";
+const CACHE_NAME = "mizanora-shell-v4";
 
 // Same-origin app shell.
 const SHELL_ASSETS = [

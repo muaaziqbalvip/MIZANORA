@@ -81,7 +81,15 @@ export function mapAuthError(err) {
     "auth/wrong-password": "Incorrect password. Please try again.",
     "auth/invalid-credential": "Incorrect email or password.",
     "auth/too-many-requests": "Too many attempts. Please wait a moment and try again.",
-    "auth/popup-closed-by-user": "Sign-in was cancelled."
+    "auth/popup-closed-by-user": "Sign-in was cancelled.",
+    "auth/unauthorized-domain": "This website's domain isn't authorized in Firebase yet. (Add it under Authentication → Settings → Authorized domains.)",
+    "auth/configuration-not-found": "Email/Password sign-in isn't enabled in Firebase yet. (Authentication → Sign-in method.)",
+    "auth/network-request-failed": "Network error — please check your internet connection and try again.",
+    "auth/api-key-not-valid.-please-pass-a-valid-api-key.": "Firebase API key looks invalid — double check firebase-init.js.",
+    "auth/invalid-api-key": "Firebase API key looks invalid — double check firebase-init.js."
   };
-  return map[code] || "Something went wrong. Please try again.";
+  if (map[code]) return map[code];
+  // Unmapped error: surface the raw code so it's screenshot-able and fixable,
+  // instead of a dead-end generic message.
+  return code ? `Something went wrong (${code}). Please try again.` : "Something went wrong. Please try again.";
 }
