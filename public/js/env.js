@@ -13,5 +13,5 @@
 // =====================================================================
 
 window.__MIZANORA_ENV__ = {
-  IMGBB_API_KEY: "YOUR_IMGBB_API_KEY"
+  IMGBB_API_KEY: "c408b58c591b9f93b9572c4176a9903f"
 };
