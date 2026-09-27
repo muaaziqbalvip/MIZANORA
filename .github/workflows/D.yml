@@ -39,7 +39,14 @@ jobs:
         echo "WHATSAPP_CATALOG_ID=$WHATSAPP_CATALOG_ID" >> functions/.env
         echo "WHATSAPP_ACCESS_TOKEN=$WHATSAPP_ACCESS_TOKEN" >> functions/.env
     
-    - name: Deploy to Firebase
+    # NOTE: "firestore" (rules + indexes) is deliberately NOT deployed here.
+    # The Firebase CLI validates/compiles firestore.rules as part of ANY
+    # firestore:* deploy target — even firestore:indexes alone — and that
+    # validation call needs a permission this service account doesn't have
+    # (HTTP 403 from firebaserules.googleapis.com). Publish rules and
+    # create indexes manually via the Firebase Console instead; only
+    # database + functions are safe to automate here.
+    - name: Deploy to Firebase (database + functions only)
       env:
         GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
-      run: firebase deploy --project mizanora-market --only firestore:rules,firestore:indexes,database,functions
+      run: firebase deploy --project mizanora-market --only database,functions
