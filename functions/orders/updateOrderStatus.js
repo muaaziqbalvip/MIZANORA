@@ -11,7 +11,7 @@ const VALID_STATUSES = [
   "out_for_delivery", "delivered", "cancelled", "returned"
 ];
 
-export const updateOrderStatus = onCall({ region: "us-central1" }, async (request) => {
+export const updateOrderStatus = onCall({ region: "us-central1", invoker: "public" }, async (request) => {
   if (request.auth?.token?.admin !== true) {
     throw new HttpsError("permission-denied", "Only admins can update order status.");
   }

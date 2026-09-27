@@ -13,7 +13,7 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
 const SHIPPING_FEE = 200; // flat rate — swap for a rules table if you need zone-based rates later
 
-export const createOrder = onCall({ region: "us-central1" }, async (request) => {
+export const createOrder = onCall({ region: "us-central1", invoker: "public" }, async (request) => {
   const data = request.data;
   const authUid = request.auth?.uid || null;
 

@@ -10,7 +10,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { db } from "../admin-init.js";
 import { FieldValue } from "firebase-admin/firestore";
 
-export const moderateReview = onCall({ region: "us-central1" }, async (request) => {
+export const moderateReview = onCall({ region: "us-central1", invoker: "public" }, async (request) => {
   if (request.auth?.token?.admin !== true) {
     throw new HttpsError("permission-denied", "Only admins can moderate reviews.");
   }

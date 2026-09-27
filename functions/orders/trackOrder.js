@@ -12,7 +12,7 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { db } from "../admin-init.js";
 
-export const trackOrder = onCall({ region: "us-central1" }, async (request) => {
+export const trackOrder = onCall({ region: "us-central1", invoker: "public" }, async (request) => {
   const { orderId, phone } = request.data;
 
   if (!orderId || !phone) {

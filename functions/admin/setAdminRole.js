@@ -11,7 +11,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { auth, db } from "../admin-init.js";
 import { FieldValue } from "firebase-admin/firestore";
 
-export const setAdminRole = onCall({ region: "us-central1" }, async (request) => {
+export const setAdminRole = onCall({ region: "us-central1", invoker: "public" }, async (request) => {
   if (request.auth?.token?.admin !== true) {
     throw new HttpsError("permission-denied", "Only existing admins can grant admin access.");
   }
@@ -38,7 +38,7 @@ export const setAdminRole = onCall({ region: "us-central1" }, async (request) =>
   return { success: true, uid: targetUser.uid, email: targetUser.email };
 });
 
-export const removeAdminRole = onCall({ region: "us-central1" }, async (request) => {
+export const removeAdminRole = onCall({ region: "us-central1", invoker: "public" }, async (request) => {
   if (request.auth?.token?.admin !== true) {
     throw new HttpsError("permission-denied", "Only existing admins can remove admin access.");
   }

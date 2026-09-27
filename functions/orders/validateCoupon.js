@@ -13,7 +13,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { db } from "../admin-init.js";
 import { Timestamp } from "firebase-admin/firestore";
 
-export const validateCoupon = onCall({ region: "us-central1" }, async (request) => {
+export const validateCoupon = onCall({ region: "us-central1", invoker: "public" }, async (request) => {
   const { code, subtotal } = request.data;
 
   if (!code || typeof subtotal !== "number") {

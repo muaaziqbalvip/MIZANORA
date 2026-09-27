@@ -121,7 +121,7 @@ async function runSync() {
 
 // ---- Manual trigger (admin-only button in the dashboard) ----
 export const syncWhatsappCatalog = onCall(
-  { region: "us-central1" },
+  { region: "us-central1", invoker: "public" },
   async (request) => {
     if (request.auth?.token?.admin !== true) {
       throw new HttpsError("permission-denied", "Only admins can sync the WhatsApp catalog.");
