@@ -1,63 +1,45 @@
-name: Bootstrap First Admin
+name: Deploy to Firebase
 
 on:
+  push:
+    branches: [ main, master ]
   workflow_dispatch:
-    inputs:
-      admin_email:
-        description: "Firebase Auth email of the first admin"
-        required: true
-        type: string
 
 jobs:
-  bootstrap-first-admin:
+  deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Create temporary Firebase service account
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: |
-          set -e
-
-          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
-            echo "ERROR: FIREBASE_SERVICE_ACCOUNT secret is missing."
-            exit 1
-          fi
-
-          mkdir -p scripts
-
-          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > scripts/service-account.json
-
-          echo "Temporary service-account.json created."
-
-      - name: Install Firebase Admin SDK
-        run: |
-          npm install firebase-admin --no-save
-
-      - name: Bootstrap first admin
-        env:
-          ADMIN_EMAIL: ${{ inputs.admin_email }}
-        run: |
-          set -e
-
-          if [ -z "$ADMIN_EMAIL" ]; then
-            echo "ERROR: Admin email is required."
-            exit 1
-          fi
-
-          echo "Bootstrapping Firebase admin..."
-          node scripts/bootstrap-first-admin.js "$ADMIN_EMAIL"
-
-      - name: Delete temporary service account
-        if: always()
-        run: |
-          rm -f scripts/service-account.json
-          echo "Temporary service-account.json deleted."
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Install Firebase CLI
+      run: npm install -g firebase-tools
+    
+    - name: Install Cloud Functions dependencies
+      run: |
+        cd functions
+        npm install
+        cd ..
+    
+    - name: Create Firebase config
+      env:
+        FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      run: echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-key.json
+    
+    - name: Create WhatsApp Catalog env file
+      env:
+        WHATSAPP_CATALOG_ID: ${{ secrets.WHATSAPP_CATALOG_ID }}
+        WHATSAPP_ACCESS_TOKEN: ${{ secrets.WHATSAPP_ACCESS_TOKEN }}
+      run: |
+        echo "WHATSAPP_CATALOG_ID=$WHATSAPP_CATALOG_ID" >> functions/.env
+        echo "WHATSAPP_ACCESS_TOKEN=$WHATSAPP_ACCESS_TOKEN" >> functions/.env
+    
+    - name: Deploy to Firebase
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-key.json
+      run: firebase deploy --project mizanora-market --only firestore:rules,firestore:indexes,database,functions
