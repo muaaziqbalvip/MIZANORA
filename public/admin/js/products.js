@@ -9,6 +9,8 @@ import {
 } from "./services/admin-products.js";
 import { listCategoriesAdmin } from "./services/admin-categories.js";
 import { uploadMultipleToImgbb } from "../../js/services/imgbb-service.js";
+import { functions } from "../../js/services/firebase-init.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-functions.js";
 
 let categories = [];
 let pendingImages = []; // { url, thumbUrl } collected during the current modal session
@@ -24,9 +26,30 @@ async function init() {
   await loadProducts();
 
   document.getElementById("add-product-btn").addEventListener("click", () => openModal());
+  document.getElementById("sync-whatsapp-btn").addEventListener("click", handleWhatsappSync);
   document.getElementById("modal-backdrop").addEventListener("click", (e) => {
     if (e.target.id === "modal-backdrop") closeModal();
   });
+}
+
+async function handleWhatsappSync() {
+  const btn = document.getElementById("sync-whatsapp-btn");
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Syncing…";
+  try {
+    const fn = httpsCallable(functions, "syncWhatsappCatalog");
+    const result = await fn();
+    const { totalItems, created, updated } = result.data;
+    alert(`WhatsApp catalog synced ✓\n\n${totalItems} products found\n${created} new, ${updated} updated.`);
+    await loadProducts();
+  } catch (err) {
+    console.error("[MIZANORA] WhatsApp sync failed:", err);
+    alert(`Sync failed: ${err.message || "Please check that WHATSAPP_CATALOG_ID and WHATSAPP_ACCESS_TOKEN are configured."}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
 }
 
 async function loadProducts() {

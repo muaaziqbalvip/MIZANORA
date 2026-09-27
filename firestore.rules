@@ -87,6 +87,14 @@ service cloud.firestore {
       match /cart/{itemId} {
         allow read, write: if isOwner(uid);
       }
+
+      // Written only by the updateOrderStatus Cloud Function (admin SDK
+      // bypasses rules); customers can read their own history but never
+      // write it directly, so points can't be self-awarded.
+      match /loyalty_history/{entryId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow write: if false;
+      }
     }
 
     // ---------------------------------------------------------------
@@ -108,6 +116,13 @@ service cloud.firestore {
     // code); a specific code is validated via the validateCoupon
     // Cloud Function, not a direct client read of the collection.
     // ---------------------------------------------------------------
+    // Written only by Cloud Functions (admin SDK bypasses rules); admins
+    // can view sync history, clients can never read/write it directly.
+    match /integration_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     match /coupons/{couponId} {
       allow get: if isAdmin(); // even a single-doc get requires admin;
                                // customers validate via callable only

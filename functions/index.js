@@ -9,3 +9,4 @@ export { trackOrder } from "./orders/trackOrder.js";
 export { validateCoupon } from "./orders/validateCoupon.js";
 export { setAdminRole, removeAdminRole } from "./admin/setAdminRole.js";
 export { moderateReview } from "./reviews/moderateReview.js";
+export { syncWhatsappCatalog, syncWhatsappCatalogScheduled } from "./integrations/syncWhatsappCatalog.js";

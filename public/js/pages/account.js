@@ -231,6 +231,7 @@ async function renderDashboard(user) {
         <button class="mz-account-nav-item" data-panel="orders">${icon("cart")} Orders</button>
         <button class="mz-account-nav-item" data-panel="wishlist">${icon("heart")} Wishlist</button>
         <button class="mz-account-nav-item" data-panel="addresses">${icon("truck")} Addresses</button>
+        <button class="mz-account-nav-item" data-panel="rewards">${icon("sparkle")} Rewards</button>
         <button class="mz-account-nav-item" data-panel="notifications">${icon("sparkle")} Notifications</button>
         <button class="mz-account-nav-item is-danger" id="logout-btn">${icon("x")} Sign Out</button>
       </nav>
@@ -252,6 +253,10 @@ async function renderDashboard(user) {
           <h2>Saved Addresses</h2>
           <div id="addresses-content"><div class="mz-skeleton" style="height:80px;margin-bottom:12px;"></div></div>
         </div>
+        <div class="mz-account-panel" data-panel-content="rewards">
+          <h2>Rewards</h2>
+          <div id="rewards-content"><div class="mz-skeleton" style="height:100px;"></div></div>
+        </div>
         <div class="mz-account-panel" data-panel-content="notifications">
           <h2>Notifications</h2>
           <div id="notifications-content"><div class="mz-skeleton" style="height:80px;margin-bottom:12px;"></div></div>
@@ -267,6 +272,7 @@ async function renderDashboard(user) {
   renderOrdersPanel(user);
   renderWishlistPanel(user);
   renderAddressesPanel(user);
+  renderRewardsPanel(profile);
   renderNotificationsPanel(user);
 }
 
@@ -279,6 +285,19 @@ function bindDashboardNav() {
       document.querySelector(`[data-panel-content="${btn.dataset.panel}"]`)?.classList.add("is-active");
     });
   });
+}
+
+function renderRewardsPanel(profile) {
+  const host = document.getElementById("rewards-content");
+  if (!host) return;
+  const points = profile?.loyaltyPoints || 0;
+  host.innerHTML = `
+    <div class="mz-rewards-card">
+      <div class="mz-rewards-card__points">${points}</div>
+      <div class="mz-rewards-card__label">Points available</div>
+      <p class="mz-rewards-card__hint">Earn 1 point for every Rs. 100 you spend — points are added automatically once your order is delivered. Worth Rs. ${points} off a future order.</p>
+    </div>
+  `;
 }
 
 function renderProfilePanel(user, profile) {

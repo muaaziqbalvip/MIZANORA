@@ -17,7 +17,13 @@
 const IMGBB_ENDPOINT = "https://api.imgbb.com/1/upload";
 
 function getImgbbKey() {
-  return "c408b58c591b9f93b9572c4176a9903f";
+  const key = window.__MIZANORA_ENV__?.IMGBB_API_KEY;
+  if (!key || key === "YOUR_IMGBB_API_KEY") {
+    throw new Error(
+      "IMGBB_API_KEY is not configured. Set it in env.js (dev) or your deploy pipeline (prod) — see README."
+    );
+  }
+  return key;
 }
 
 /**

@@ -84,3 +84,29 @@ export async function mergeGuestWishlist(uid, localWishlistIds) {
   if (!localWishlistIds || localWishlistIds.length === 0) return;
   await Promise.all(localWishlistIds.map((id) => addToFirestoreWishlist(uid, id)));
 }
+
+// ---- Reviews (customer-submitted; always start as "pending" — admin
+// approves via the moderateReview Cloud Function, which then updates
+// the product's denormalized rating/reviewCount). ----
+export async function submitReview(uid, customerName, { productId, rating, title, comment, photos }) {
+  const ref = await addDoc(collection(db, "reviews"), {
+    customerId: uid,
+    customerName: customerName || "Customer",
+    productId,
+    rating,
+    title: title || null,
+    comment: comment || "",
+    photos: photos || [],
+    status: "pending",
+    createdAt: serverTimestamp()
+  });
+  return ref.id;
+}
+
+// ---- Loyalty / reward points ----
+// 1 point per Rs. 100 spent, awarded when an order is marked "delivered"
+// (see functions/orders/updateOrderStatus.js). Redemption value: Rs. 1 per point.
+export async function getLoyaltyPoints(uid) {
+  const profile = await getCustomerProfile(uid);
+  return profile?.loyaltyPoints || 0;
+}

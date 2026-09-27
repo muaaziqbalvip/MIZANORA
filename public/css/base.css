@@ -218,3 +218,16 @@ p { margin: 0; }
 .mz-saved-address-chip:hover { border-color: var(--mz-gold); }
 .mz-saved-address-chip.is-selected { border-color: var(--mz-gold); background: rgba(212,175,106,0.08); }
 .mz-saved-address-chip.is-new { align-items: center; justify-content: center; color: var(--mz-gold); font-size: 0.85rem; }
+
+/* ================= REWARDS ================= */
+.mz-rewards-card {
+  background: linear-gradient(135deg, rgba(212,175,106,0.15), rgba(212,175,106,0.03));
+  border: 1px solid rgba(212,175,106,0.3);
+  border-radius: var(--mz-radius-lg);
+  padding: var(--mz-space-6);
+  text-align: center;
+  max-width: 420px;
+}
+.mz-rewards-card__points { font-family: var(--mz-font-display); font-size: 3rem; color: var(--mz-gold); line-height: 1; }
+.mz-rewards-card__label { color: var(--mz-text-dim); font-size: 0.85rem; margin-top: 4px; }
+.mz-rewards-card__hint { color: var(--mz-text-faint); font-size: 0.82rem; margin-top: var(--mz-space-4); line-height: 1.6; }

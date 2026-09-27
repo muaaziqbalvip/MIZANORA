@@ -8,6 +8,7 @@ import {
 import { addToCart } from "../services/cart-store.js";
 import { toggleWishlist, isWishlisted } from "../services/wishlist-store.js";
 import { icon } from "../utils/icons.js";
+import { trackProductView, getRecentlyViewed } from "../utils/recently-viewed.js";
 import { formatPKR, discountPercent, initials, initScrollReveal } from "../utils/format.js";
 import {
   initShell, productCardHtml, bindProductCardEvents, emptyStateHtml, escapeHtml
@@ -44,6 +45,8 @@ async function init() {
   renderProduct(currentProduct);
   bindTabs();
   bindGalleryZoom();
+  trackProductView(currentProduct);
+  renderRecentlyViewed(currentProduct.id);
 
   const [reviews, related] = await Promise.all([
     getReviewsForProduct(currentProduct.id).catch(() => []),
@@ -184,6 +187,7 @@ function renderProduct(p) {
     </div>
 
     <div class="mz-related" id="related-container"></div>
+    <div class="mz-related" id="recently-viewed-container"></div>
   `;
 
   bindProductActions(p);
@@ -281,6 +285,21 @@ function renderReviews(reviews) {
       `).join("")}
     </div>
   `;
+}
+
+function renderRecentlyViewed(currentId) {
+  const container = document.getElementById("recently-viewed-container");
+  if (!container) return;
+  const items = getRecentlyViewed(currentId, 8);
+  if (items.length === 0) return;
+
+  container.innerHTML = `
+    <div class="mz-section__head"><h2>Recently Viewed</h2></div>
+    <div class="mz-product-grid">
+      ${items.map(productCardHtml).join("")}
+    </div>
+  `;
+  bindProductCardEvents(container);
 }
 
 function renderRelated(related) {

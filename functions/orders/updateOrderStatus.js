@@ -38,6 +38,27 @@ export const updateOrderStatus = onCall({ region: "us-central1" }, async (reques
 
   await orderRef.update(updates);
 
+  // Award loyalty points once, the first time an order reaches "delivered"
+  // (1 point per Rs. 100 of the order total). Server-side only, so a
+  // customer can never inflate their own balance.
+  const order = snap.data();
+  if (status === "delivered" && order.orderStatus !== "delivered" && order.customerId) {
+    const pointsEarned = Math.floor((order.total || 0) / 100);
+    if (pointsEarned > 0) {
+      const customerRef = db.collection("customers").doc(order.customerId);
+      await customerRef.set(
+        { loyaltyPoints: FieldValue.increment(pointsEarned) },
+        { merge: true }
+      );
+      await customerRef.collection("loyalty_history").add({
+        type: "earned",
+        points: pointsEarned,
+        orderId,
+        timestamp: FieldValue.serverTimestamp()
+      });
+    }
+  }
+
   await orderRef.collection("order_history").add({
     status,
     note: note || null,
