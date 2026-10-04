@@ -1,30 +1,107 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [
-    { "source": "/category/:slug*", "destination": "/category.html" },
-    { "source": "/product/:slug*", "destination": "/product.html" },
-    { "source": "/shop", "destination": "/shop.html" },
-    { "source": "/search", "destination": "/search.html" },
-    { "source": "/cart", "destination": "/cart.html" },
-    { "source": "/checkout", "destination": "/checkout.html" },
-    { "source": "/order-success", "destination": "/order-success.html" },
-    { "source": "/track-order", "destination": "/track-order.html" },
-    { "source": "/account", "destination": "/account.html" },
-    { "source": "/admin", "destination": "/admin/index.html" }
+  "outputDirectory": "public",
+  "redirects": [
+    {
+      "source": "/shop",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/cart",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/checkout",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/order-success",
+      "destination": "/how-to-order",
+      "permanent": true
+    },
+    {
+      "source": "/track-order",
+      "destination": "/how-to-order",
+      "permanent": true
+    },
+    {
+      "source": "/account",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/search",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/categories",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/new-arrivals",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/best-sellers",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/offers",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/wishlist",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/admin",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/product/:slug*",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/category/:slug*",
+      "destination": "/products",
+      "permanent": true
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/",
+      "permanent": true
+    }
   ],
   "headers": [
     {
-      "source": "/(.*)\\.(jpg|jpeg|png|webp|svg)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, immutable" }]
-    },
-    {
-      "source": "/(.*)\\.(css|js)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
-    },
-    {
       "source": "/service-worker.js",
-      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(jpg|png|webp|svg)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800"
+        }
+      ]
     }
   ]
 }
