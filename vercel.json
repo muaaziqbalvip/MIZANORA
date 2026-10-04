@@ -1,7 +1,10 @@
 {
+  "framework": null,
+  "buildCommand": "node build.js",
+  "outputDirectory": "public",
+  "installCommand": "",
   "cleanUrls": true,
   "trailingSlash": false,
-  "outputDirectory": "public",
   "redirects": [
     {
       "source": "/shop",
