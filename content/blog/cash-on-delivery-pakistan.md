@@ -51,4 +51,4 @@ In honest trade, both sides keep their promise. The seller sends what was descri
 
 ## COD at Mizanora
 
-Cash on delivery is available in many areas of Pakistan, but it depends on your city, so please confirm it with us on WhatsApp before ordering. We tell you the full price and delivery details in the chat first. See [how to order](/how-to-order) for the simple steps.
+Every Mizanora order is cash on delivery. Pick your product, fill one short form, and pay the rider when the parcel arrives. We confirm your order on WhatsApp before dispatch. See [how to order](/how-to-order) for the simple steps.

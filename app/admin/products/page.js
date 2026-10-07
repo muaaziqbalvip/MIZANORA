@@ -1,0 +1,122 @@
+'use client';
+import { useCallback, useEffect, useState } from 'react';
+import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
+import { dbClient, authClient } from '@/lib/firebase-client';
+import { formatPKR, slugify } from '@/lib/format';
+
+const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', sizes: '', inStock: true, featured: false, active: true };
+const SAMPLE = {
+  name: 'Tactical Boots', slug: 'tactical-boots', price: 3500, comparePrice: 0, category: 'Footwear',
+  description: 'Lace-up, side-zip tactical boots in sand colour for work, hiking and everyday wear.\n\nEdit this text, the price and the photos in the admin panel.',
+  images: [], sizes: ['40', '41', '42', '43', '44', '45'], inStock: true, featured: true, active: true,
+};
+
+export default function AdminProducts() {
+  const [list, setList] = useState(null);
+  const [form, setForm] = useState(EMPTY);
+  const [editing, setEditing] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    const snap = await getDocs(collection(dbClient(), 'products'));
+    setList(snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)));
+  }, []);
+  useEffect(() => { load().catch((e) => setMsg(e.message)); }, [load]);
+
+  const set = (k) => (e) => {
+    const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setForm((f) => ({ ...f, [k]: v, ...(k === 'name' && !editing ? { slug: slugify(v) } : {}) }));
+  };
+
+  async function revalidate(slug) {
+    try {
+      const token = await authClient().currentUser.getIdToken();
+      await fetch('/api/revalidate', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ slug }) });
+    } catch (_) { /* pages refresh by themselves within 5 minutes anyway */ }
+  }
+
+  async function save(data, isNew) {
+    const slug = slugify(data.slug || data.name);
+    if (!data.name || !slug) { setMsg('Name is required.'); return; }
+    const price = Number(data.price);
+    if (!(price > 0)) { setMsg('Enter a valid price in PKR.'); return; }
+    setBusy(true); setMsg('');
+    try {
+      const existing = (list || []).find((p) => p.id === slug);
+      if (isNew && existing) { setMsg('A product with this slug already exists. Edit it from the list.'); setBusy(false); return; }
+      const now = Date.now();
+      const toArr = (v) => (Array.isArray(v) ? v : String(v || '').split(/[\n,]/)).map((x) => String(x).trim()).filter(Boolean);
+      await setDoc(doc(dbClient(), 'products', slug), {
+        name: data.name.trim(), price, comparePrice: Number(data.comparePrice) || 0, category: (data.category || '').trim(),
+        description: (data.description || '').trim(), images: toArr(data.images), sizes: toArr(data.sizes),
+        inStock: Boolean(data.inStock), featured: Boolean(data.featured), active: Boolean(data.active),
+        createdAt: existing ? existing.createdAt || now : now, updatedAt: now,
+      });
+      await revalidate(slug);
+      setMsg(`Saved "${data.name}".`);
+      setForm(EMPTY); setEditing(false);
+      await load();
+    } catch (e) { setMsg(e.message); }
+    setBusy(false);
+  }
+
+  const edit = (p) => {
+    setEditing(true);
+    setForm({ ...EMPTY, ...p, slug: p.id, price: p.price, comparePrice: p.comparePrice || '', images: (p.images || []).join('\n'), sizes: (p.sizes || []).join(', ') });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  async function remove(p) {
+    if (!confirm(`Delete "${p.name}" permanently?`)) return;
+    await deleteDoc(doc(dbClient(), 'products', p.id)); await revalidate(p.id); await load();
+  }
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1fr_24rem]">
+      <section>
+        <h1 className="mb-4 text-4xl font-bold">Products</h1>
+        {msg && <p role="status" className="mb-3 rounded-xl bg-raised p-3 text-sm text-cream">{msg}</p>}
+        {!list ? <p className="text-dim">Loading...</p> : list.length === 0 ? (
+          <div className="card text-center">
+            <p className="text-dim">No products yet.</p>
+            <button className="btn-ghost mt-3" disabled={busy} onClick={() => save(SAMPLE, true)}>Add a sample product (Tactical Boots)</button>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {list.map((p) => (
+              <li key={p.id} className="card flex items-center gap-3 !p-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">{p.name} {p.active === false && <span className="text-xs text-red-300">(hidden)</span>}</p>
+                  <p className="text-sm text-dim">{formatPKR(p.price)} · {p.inStock === false ? 'Sold out' : 'In stock'}{p.featured ? ' · Featured' : ''}</p>
+                </div>
+                <button className="btn-ghost !px-4 !py-2 text-sm" onClick={() => edit(p)}>Edit</button>
+                <button className="px-2 text-sm text-red-300" onClick={() => remove(p)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <form className="card h-fit space-y-3 lg:sticky lg:top-24" onSubmit={(e) => { e.preventDefault(); save(form, !editing); }}>
+        <h2 className="text-2xl font-semibold">{editing ? 'Edit product' : 'Add product'}</h2>
+        <div><label className="label" htmlFor="pn">Name</label><input id="pn" className="input" value={form.name} onChange={set('name')} required /></div>
+        <div><label className="label" htmlFor="ps">URL slug</label><input id="ps" className="input" value={form.slug} onChange={set('slug')} disabled={editing} /></div>
+        <div className="grid grid-cols-2 gap-3">
+          <div><label className="label" htmlFor="pp">Price (PKR)</label><input id="pp" type="number" min="1" className="input" value={form.price} onChange={set('price')} required /></div>
+          <div><label className="label" htmlFor="pc">Old price</label><input id="pc" type="number" min="0" className="input" value={form.comparePrice} onChange={set('comparePrice')} /></div>
+        </div>
+        <div><label className="label" htmlFor="pk">Category</label><input id="pk" className="input" value={form.category} onChange={set('category')} /></div>
+        <div><label className="label" htmlFor="pd">Description</label><textarea id="pd" rows={5} className="input" value={form.description} onChange={set('description')} /></div>
+        <div><label className="label" htmlFor="pi">Image links (one per line)</label><textarea id="pi" rows={3} className="input" value={form.images} onChange={set('images')} placeholder="https://..." /></div>
+        <div><label className="label" htmlFor="pz">Sizes (comma separated, optional)</label><input id="pz" className="input" value={form.sizes} onChange={set('sizes')} placeholder="40, 41, 42, 43" /></div>
+        <div className="flex flex-wrap gap-4 text-sm">
+          {[['inStock', 'In stock'], ['featured', 'Featured on home'], ['active', 'Visible']].map(([k, l]) => (
+            <label key={k} className="flex items-center gap-2"><input type="checkbox" checked={Boolean(form[k])} onChange={set(k)} className="h-4 w-4 accent-[#D4AF6A]" /> {l}</label>
+          ))}
+        </div>
+        <button className="btn-gold w-full" disabled={busy}>{busy ? 'Saving...' : 'Save product'}</button>
+        {editing && <button type="button" className="btn-ghost w-full" onClick={() => { setForm(EMPTY); setEditing(false); }}>Cancel edit</button>}
+      </form>
+    </div>
+  );
+}

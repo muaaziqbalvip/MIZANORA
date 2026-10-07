@@ -66,4 +66,4 @@ This is general advice and not legal advice. For serious losses, speak to a lawy
 
 ## How to know it is the real Mizanora
 
-Copycats often use a well-known name. Only trust the links on this website. Our WhatsApp number is **+92 306 2015326**, and our official accounts are listed on the [Connect page](/connect). We confirm price and delivery details in the chat before anything is final. For more tips, read [how to shop online safely in Pakistan](/blog/safe-online-shopping-pakistan).
+Copycats often use a well-known name. Only trust the links on this website. Our WhatsApp number is **+92 306 2015326**, and our official accounts are listed on the [Connect page](/connect). We never ask for money in advance, and we confirm every order with you on WhatsApp before it is dispatched. For more tips, read [how to shop online safely in Pakistan](/blog/safe-online-shopping-pakistan).

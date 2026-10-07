@@ -62,6 +62,6 @@ Open the parcel carefully and check it against your chat messages. Look at the p
 
 ## How Mizanora keeps ordering simple and clear
 
-At Mizanora we do not ask you to fill out forms or pay on a website. You message us on WhatsApp, we confirm the price and delivery details with you, and you decide. You can see all our official links on the [Connect page](/connect), and our step-by-step process is on the [How to order](/how-to-order) page.
+At Mizanora you pay cash on delivery, so you never pay for a parcel you have not received. We also confirm every order with you on WhatsApp before dispatch. You can see all our official links on the [Connect page](/connect), and our step-by-step process is on the [How to order](/how-to-order) page.
 
 Shopping online is safe when you slow down, ask questions and keep records. Use this checklist every time, with any seller.

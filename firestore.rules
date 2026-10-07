@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Replace with the admin's UID (Firebase Console > Authentication > Users > "User UID")
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == 'PASTE_ADMIN_UID_HERE';
+    }
+
+    // Anyone can read the catalog. Only the admin can change it.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders are created ONLY by the server (/api/orders uses the Admin SDK, which bypasses these rules).
+    // Browsers can never create, read or edit orders. Only the admin can read and update them.
+    match /orders/{orderId} {
+      allow read, update: if isAdmin();
+      allow create, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
