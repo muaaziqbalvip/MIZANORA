@@ -4,6 +4,7 @@ import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore'
 import { dbClient, authClient } from '@/lib/firebase-client';
 import { formatPKR, slugify } from '@/lib/format';
 import ImageUploader from '@/components/ImageUploader';
+import { DEPARTMENTS } from '@/lib/departments';
 
 const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', sizes: '', inStock: true, featured: false, active: true };
 const SAMPLE = {
@@ -55,10 +56,10 @@ export default function AdminProducts() {
         createdAt: existing ? existing.createdAt || now : now, updatedAt: now,
       });
       await revalidate(slug);
-      setMsg(`Saved "${data.name}".`);
+      setMsg(`Saved "${data.name}". It appears on the shop within a minute.`);
       setForm(EMPTY); setEditing(false);
       await load();
-    } catch (e) { setMsg(e.message); }
+    } catch (e) { setMsg(e && e.code === 'permission-denied' ? 'Permission denied: your account is not the admin in Firestore rules. Paste your UID/email in firestore.rules and click Publish.' : (e && e.message) || 'Could not save.'); }
     setBusy(false);
   }
 
@@ -106,7 +107,7 @@ export default function AdminProducts() {
           <div><label className="label" htmlFor="pp">Price (PKR)</label><input id="pp" type="number" min="1" className="input" value={form.price} onChange={set('price')} required /></div>
           <div><label className="label" htmlFor="pc">Old price</label><input id="pc" type="number" min="0" className="input" value={form.comparePrice} onChange={set('comparePrice')} /></div>
         </div>
-        <div><label className="label" htmlFor="pk">Category</label><input id="pk" list="cats" className="input" value={form.category} onChange={set('category')} placeholder="e.g. Footwear" /><datalist id="cats">{[...new Set((list || []).map((x) => x.category).filter(Boolean))].map((c) => <option key={c} value={c} />)}</datalist></div>
+        <div><label className="label" htmlFor="pk">Category</label><input id="pk" list="cats" className="input" value={form.category} onChange={set('category')} placeholder="e.g. Footwear" /><datalist id="cats">{[...new Set([...(list || []).map((x) => x.category).filter(Boolean), ...DEPARTMENTS.map((d) => d.name)])].map((c) => <option key={c} value={c} />)}</datalist></div>
         <div><label className="label" htmlFor="pd">Description</label><textarea id="pd" rows={5} className="input" value={form.description} onChange={set('description')} /></div>
         <div>
           <label className="label" htmlFor="pi">Photos (first photo is the main one)</label>
@@ -128,7 +129,7 @@ export default function AdminProducts() {
         <div><label className="label" htmlFor="pz">Sizes (comma separated, optional)</label><input id="pz" className="input" value={form.sizes} onChange={set('sizes')} placeholder="40, 41, 42, 43" /></div>
         <div className="flex flex-wrap gap-4 text-sm">
           {[['inStock', 'In stock'], ['featured', 'Featured on home'], ['active', 'Visible']].map(([k, l]) => (
-            <label key={k} className="flex items-center gap-2"><input type="checkbox" checked={Boolean(form[k])} onChange={set(k)} className="h-4 w-4 accent-[#D4AF6A]" /> {l}</label>
+            <label key={k} className="flex items-center gap-2"><input type="checkbox" checked={Boolean(form[k])} onChange={set(k)} className="h-4 w-4 accent-[#0B6B45]" /> {l}</label>
           ))}
         </div>
         <button className="btn-gold w-full" disabled={busy}>{busy ? 'Saving...' : 'Save product'}</button>

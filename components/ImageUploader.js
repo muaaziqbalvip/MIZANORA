@@ -25,8 +25,9 @@ export default function ImageUploader({ onUploaded, multiple = true, max = 1600,
         const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.ok) {
-          if (data.error === 'not_admin') throw new Error(`The server does not recognise this admin account. In Vercel add ADMIN_UID = ${data.uid} and redeploy.`);
-          throw new Error(data.error || 'Upload failed.');
+          if (data.error === 'not_admin') throw new Error('This account is not the admin in your Firestore rules. Paste your UID or Google email in firestore.rules, click Publish, then sign in again.');
+          if (res.status === 413) throw new Error('Photo is too big for the server. Pick a smaller photo.');
+          throw new Error(data.error || `Upload failed (HTTP ${res.status}). Open /api/health to check IMGBB_API_KEY.`);
         }
         urls.push(data.url);
       }

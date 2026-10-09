@@ -11,7 +11,7 @@ import ProductCard from '@/components/ProductCard';
 import TrackView from '@/components/TrackView';
 import JsonLd from '@/components/JsonLd';
 
-export const revalidate = 300;
+export const revalidate = 60;
 export const dynamicParams = true; // new products work immediately, without a redeploy
 
 export async function generateStaticParams() {
@@ -39,7 +39,8 @@ export default async function ProductPage({ params }) {
   if (!p) notFound();
 
   const all = await getProducts();
-  const related = all.filter((x) => x.slug !== p.slug).slice(0, 4);
+  const sameCat = all.filter((x) => x.slug !== p.slug && p.category && x.category === p.category);
+  const related = [...sameCat, ...all.filter((x) => x.slug !== p.slug && !sameCat.includes(x))].slice(0, 4);
   const off = discountPct(p.price, p.comparePrice);
   const url = absUrl(`/product/${p.slug}`);
 
@@ -61,6 +62,13 @@ export default async function ProductPage({ params }) {
       availability: p.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: SITE.name },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: { '@type': 'MonetaryAmount', value: String(SITE.shippingFee), currency: 'PKR' },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'PK' },
+        deliveryTime: { '@type': 'ShippingDeliveryTime', handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 2, unitCode: 'DAY' }, transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 7, unitCode: 'DAY' } },
+      },
+      hasMerchantReturnPolicy: { '@type': 'MerchantReturnPolicy', applicableCountry: 'PK', url: absUrl('/returns') },
     },
   };
 
@@ -93,7 +101,7 @@ export default async function ProductPage({ params }) {
         {p.description && (
           <section className="mt-10 max-w-3xl" aria-labelledby="desc">
             <h2 id="desc" className="section-title mb-3">Product details</h2>
-            <div className="space-y-3 whitespace-pre-line leading-8 text-[#DDD7CC]">{p.description}</div>
+            <div className="space-y-3 whitespace-pre-line leading-8 text-[#33423A]">{p.description}</div>
           </section>
         )}
 

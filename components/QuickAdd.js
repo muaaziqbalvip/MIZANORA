@@ -15,7 +15,7 @@ export default function QuickAdd({ p }) {
   }
   return (
     <button type="button" onClick={() => { add(p, { qty: 1 }); addToCart(p, 1); setDone(true); setTimeout(() => setDone(false), 1800); }}
-      className="flex w-full items-center justify-center gap-1.5 rounded-full bg-gold py-2 text-xs font-bold text-ink hover:bg-goldhi" aria-live="polite">
+      className="flex w-full items-center justify-center gap-1.5 rounded-full bg-gold py-2 text-xs font-bold text-white hover:bg-goldhi" aria-live="polite">
       {done ? <><Check size={14} /> Added</> : <><Plus size={14} /> Add to cart</>}
     </button>
   );

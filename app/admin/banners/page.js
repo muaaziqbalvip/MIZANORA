@@ -94,7 +94,7 @@ export default function AdminBanners() {
         </div>
         <div className="grid grid-cols-2 items-end gap-3">
           <div><label className="label" htmlFor="bo">Order</label><input id="bo" type="number" className="input" value={form.order} onChange={set('order')} /></div>
-          <label className="flex items-center gap-2 pb-3 text-sm"><input type="checkbox" checked={Boolean(form.active)} onChange={set('active')} className="h-4 w-4 accent-[#D4AF6A]" /> Visible</label>
+          <label className="flex items-center gap-2 pb-3 text-sm"><input type="checkbox" checked={Boolean(form.active)} onChange={set('active')} className="h-4 w-4 accent-[#0B6B45]" /> Visible</label>
         </div>
         <button className="btn-gold w-full" disabled={busy}>{busy ? 'Saving...' : 'Save banner'}</button>
         {form.id && <button type="button" className="btn-ghost w-full" onClick={() => setForm(EMPTY)}>Cancel edit</button>}

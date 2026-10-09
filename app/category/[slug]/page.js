@@ -2,13 +2,14 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { absUrl } from '@/lib/config';
+import { DEPARTMENTS } from '@/lib/departments';
 import { getProducts, buildCategories } from '@/lib/products';
 import { pageMeta, breadcrumbJsonLd } from '@/lib/seo';
 import { PageHead } from '@/components/Prose';
 import ProductGrid from '@/components/ProductGrid';
 import JsonLd from '@/components/JsonLd';
 
-export const revalidate = 300;
+export const revalidate = 60;
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
@@ -18,23 +19,29 @@ export async function generateStaticParams() {
 async function load(params) {
   const { slug } = await params;
   const all = await getProducts();
-  const cat = buildCategories(all).find((c) => c.slug === slug);
-  return { cat, items: cat ? all.filter((p) => p.category === cat.name) : [] };
+  let cat = buildCategories(all).find((c) => c.slug === slug);
+  let empty = false;
+  if (!cat) {
+    const d = DEPARTMENTS.find((x) => x.slug === slug);
+    if (d) { cat = { name: d.name, slug: d.slug, count: 0, image: '' }; empty = true; }
+  }
+  return { cat, empty, items: cat && !empty ? all.filter((p) => p.category === cat.name) : [] };
 }
 
 export async function generateMetadata({ params }) {
-  const { cat } = await load(params);
+  const { cat, empty } = await load(params);
   if (!cat) return { title: 'Category not found', robots: { index: false } };
   return pageMeta({
     title: `Buy ${cat.name} Online in Pakistan`,
     description: `Shop ${cat.name} online in Pakistan at Mizanora. ${cat.count} product${cat.count > 1 ? 's' : ''}, cash on delivery across Pakistan, honest prices.`,
     path: `/category/${cat.slug}`,
     image: cat.image || '/img/hero-banner.jpg',
+    noindex: empty,
   });
 }
 
 export default async function CategoryPage({ params }) {
-  const { cat, items } = await load(params);
+  const { cat, items, empty } = await load(params);
   if (!cat) notFound();
   const list = {
     '@context': 'https://schema.org', '@type': 'CollectionPage', name: cat.name, url: absUrl(`/category/${cat.slug}`),
@@ -42,9 +49,11 @@ export default async function CategoryPage({ params }) {
   };
   return (
     <>
-      <PageHead title={cat.name} intro={`${cat.count} product${cat.count > 1 ? 's' : ''}. Pay cash on delivery anywhere in Pakistan.`} crumbs={[['/', 'Home'], ['/products', 'Products'], [null, cat.name]]} />
+      <PageHead title={cat.name} intro={empty ? 'New products are coming to this department soon.' : `${cat.count} product${cat.count > 1 ? 's' : ''}. Pay cash on delivery anywhere in Pakistan.`} crumbs={[['/', 'Home'], ['/products', 'Products'], [null, cat.name]]} />
       <div className="mx-auto max-w-7xl px-3 py-8 sm:px-4">
-        <Suspense fallback={null}><ProductGrid products={items} /></Suspense>
+        {empty ? (
+          <div className="card text-center"><p className="text-dim">We are adding {cat.name} products. Meanwhile, explore everything else in the market.</p><Link href="/products" className="btn-gold mt-4">Browse all products</Link></div>
+        ) : <Suspense fallback={null}><ProductGrid products={items} /></Suspense>}
         <p className="mt-8 text-sm text-dim">Looking for something else? <Link href="/products" className="text-gold underline underline-offset-4">See all products</Link>.</p>
       </div>
       <JsonLd data={[list, breadcrumbJsonLd([['/', 'Home'], ['/products', 'Products'], [`/category/${cat.slug}`, cat.name]])]} />

@@ -1,10 +1,14 @@
 import { SITE } from '@/lib/config';
+import Marquee from './Marquee';
 
+// Moving offer ticker above the header (like a market's loudspeaker).
 export default function AnnouncementBar() {
-  if (!SITE.announcement) return null;
+  const items = [...new Set([SITE.announcement, 'Free delivery offers on selected items', 'New products added every week', 'Shop smart. Shop halal.', 'WhatsApp support when you need help'].filter(Boolean))];
   return (
-    <div className="bg-gold px-3 py-1.5 text-center text-xs font-semibold text-ink sm:text-sm">
-      {SITE.announcement}
+    <div className="bg-[#073D28] text-xs font-semibold text-white sm:text-sm">
+      <Marquee seconds={45} label="Offers">
+        {items.map((t) => <span key={t} className="whitespace-nowrap px-8 py-1.5">{t}<span className="ml-8 text-saffron" aria-hidden="true">●</span></span>)}
+      </Marquee>
     </div>
   );
 }

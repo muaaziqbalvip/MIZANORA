@@ -82,3 +82,12 @@
 - **Orders are protected:** browsers cannot create, read or change orders. The server creates them and calculates prices from your database, so nobody can edit prices in the browser.
 - Firebase Storage is not used (it needs a paid plan now), so images are links.
 - Local run: `npm install`, copy `.env.example` to `.env.local`, then `npm run dev`.
+
+## 9. What changed in this update (read this first)
+- **Products now always show.** The shop reads products with the Admin key if it works, and otherwise straight from Firestore's public REST API (only the NEXT_PUBLIC_FIREBASE_* values are needed). New products appear within about a minute.
+- **Open `/api/health`** on your site. It tells you with yes/no flags what is missing in Vercel (IMGBB_API_KEY, Firebase keys, Meta Pixel) and how many products the shop can see. The same warnings show at the top of `/admin`.
+- **Photo upload and admin checks** no longer need ADMIN_UID. The server asks Firestore itself whether you are the admin (same rules as orders). You only need `IMGBB_API_KEY` in Vercel, then Redeploy. Your UID or Google email must be in `firestore.rules` and published.
+- **Sign-in errors** now show the exact reason (for example unauthorized domain, wrong API key, method switched off) and how to fix it. Inside Facebook/Instagram browsers Google sign-in uses redirect; open /admin in Chrome if it still fails.
+- **Meta:** Graph API default is now v26.0 (current). Meta product catalog feed: in Commerce Manager > Catalog > Data sources > Data feed, use `https://YOUR-DOMAIN/api/feed` with a daily schedule. Feed ids equal the product slug, the same ids the Pixel sends, so catalog ads match.
+- **Blog:** add a new post any time by adding a `.md` file in `content/blog/` (copy any existing file for the format) and commit it.
+- **Departments:** the home page shows starter departments (Footwear, Men Fashion, Mobile Accessories, ...). Use the same name in a product's Category field and it becomes a real category with its own shelf.

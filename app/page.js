@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, Truck, Headphones, Banknote } from 'lucide-react';
+import { ShieldCheck, Truck, Headphones, Banknote, Footprints, Shirt, Gem, Baby, Smartphone, Cpu, Home as HomeIcon, Sparkles, Dumbbell, HeartPulse, ShoppingBasket, Car, ArrowRight } from 'lucide-react';
 import { SITE } from '@/lib/config';
 import { getProducts, getBanners, buildCategories } from '@/lib/products';
 import { getPosts } from '@/lib/blog';
@@ -10,28 +10,40 @@ import { discountPct, formatPKR } from '@/lib/format';
 import ProductCard from '@/components/ProductCard';
 import BannerCarousel from '@/components/BannerCarousel';
 import ReorderBanner from '@/components/ReorderBanner';
-import InstallButton from '@/components/InstallButton';
+import Marquee from '@/components/Marquee';
+import { DEPARTMENTS } from '@/lib/departments';
 import JsonLd from '@/components/JsonLd';
 import { SOCIAL_ICONS } from '@/components/Icons';
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export const metadata = pageMeta({
-  title: { absolute: 'Mizanora | Online Shopping in Pakistan, Cash on Delivery' },
-  description: 'Shop quality products online in Pakistan with cash on delivery. Tactical boots and more. Shop smart. Shop halal. WhatsApp support when you need help.',
+  title: { absolute: 'Mizanora | Online Market in Pakistan: Shop Fashion, Footwear, Gadgets & More, Cash on Delivery' },
+  description: 'Mizanora is an online market in Pakistan. Shop footwear, fashion, mobile accessories, home items and more with cash on delivery. Read shopping guides. Shop smart. Shop halal.',
   path: '/',
 });
 
-function Shelf({ id, title, href, products, priorityFirst = false }) {
+const DEPT_ICONS = [Footprints, Shirt, Gem, Baby, Smartphone, Cpu, HomeIcon, Sparkles, Dumbbell, HeartPulse, ShoppingBasket, Car];
+
+const DEFAULT_SLIDES = [
+  { id: 'd1', kicker: 'Mizanora market', title: 'Everything you need, one trusted market', subtitle: 'Fashion, footwear, gadgets, home and more. Pay cash on delivery.', link: '/products', cta: 'Start shopping', bg: 'bg-gradient-to-br from-[#0B6B45] via-[#0E8556] to-[#073D28]' },
+  { id: 'd2', kicker: 'Pay on delivery', title: 'See it. Receive it. Then pay.', subtitle: 'Cash on delivery across Pakistan. No account needed.', link: '/how-to-order', cta: 'How to order', bg: 'bg-gradient-to-br from-[#F29F05] via-[#E8860A] to-[#B45309]' },
+  { id: 'd3', kicker: 'Shopping blog', title: 'Shop smarter with our guides', subtitle: 'Safe buying, size help, price checks and Eid shopping tips.', link: '/blog', cta: 'Read guides', bg: 'bg-gradient-to-br from-[#1E3A5F] via-[#27507F] to-[#0F2440]' },
+];
+
+// Horizontal swipe row on phones (like an app), grid on large screens.
+function Shelf({ id, title, href, products, priorityFirst = false, tone = '' }) {
   if (!products.length) return null;
   return (
-    <section className="mx-auto max-w-7xl px-3 pt-10 sm:px-4" aria-labelledby={id}>
-      <div className="mb-4 flex items-end justify-between gap-4">
-        <h2 id={id} className="section-title">{title}</h2>
-        {href && <Link href={href} className="whitespace-nowrap text-sm font-semibold text-gold">View all</Link>}
-      </div>
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
-        {products.map((p, i) => <ProductCard key={p.id} p={p} priority={priorityFirst && i < 4} />)}
+    <section className="mx-auto max-w-7xl px-3 pt-8 sm:px-4" aria-labelledby={id}>
+      <div className={`rounded-2xl ${tone}`}>
+        <div className="mb-3 flex items-end justify-between gap-4">
+          <h2 id={id} className="section-title">{title}</h2>
+          {href && <Link href={href} className="flex items-center gap-1 whitespace-nowrap text-sm font-bold text-gold">View all <ArrowRight size={15} /></Link>}
+        </div>
+        <div className="no-sb -mx-1 flex snap-x gap-2.5 overflow-x-auto px-1 pb-2 md:mx-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible md:px-0 lg:grid-cols-5">
+          {products.map((p, i) => <div key={p.id} className="w-[44vw] max-w-[200px] shrink-0 snap-start md:w-auto md:max-w-none"><ProductCard p={p} priority={priorityFirst && i < 3} /></div>)}
+        </div>
       </div>
     </section>
   );
@@ -41,67 +53,74 @@ export default async function Home() {
   const [all, banners] = await Promise.all([getProducts(), getBanners()]);
   const categories = buildCategories(all);
   const deals = all.filter((p) => discountPct(p.price, p.comparePrice) > 0)
-    .sort((a, b) => discountPct(b.price, b.comparePrice) - discountPct(a.price, a.comparePrice)).slice(0, 5);
-  const picks = all.filter((p) => p.featured).slice(0, 5);
-  const fresh = all.slice(0, 10);
-  const shelves = categories.slice(0, 3).map((c) => ({ c, items: all.filter((p) => p.category === c.name).slice(0, 5) }));
-  const posts = getPosts().slice(0, 3);
+    .sort((a, b) => discountPct(b.price, b.comparePrice) - discountPct(a.price, a.comparePrice)).slice(0, 10);
+  const picks = all.filter((p) => p.featured).slice(0, 10);
+  const fresh = all.slice(0, 12);
+  const shelves = categories.map((c) => ({ c, items: all.filter((p) => p.category === c.name).slice(0, 10) }));
+  const posts = getPosts().slice(0, 4);
   const socials = SITE.social.filter((s) => s.url);
   const delivery = SITE.shippingFee > 0 ? `Delivery ${formatPKR(SITE.shippingFee)}` : 'Free delivery';
 
+  // Moving "Trending now" strip: featured first, then newest. Repeated so a small catalog still fills the strip.
+  const trendBase = [...picks, ...all.filter((p) => !p.featured)].slice(0, 14);
+  const trend = trendBase.length && trendBase.length < 8 ? Array.from({ length: Math.ceil(8 / trendBase.length) }, () => trendBase).flat() : trendBase;
+
+  // Circles: real categories first, then starter departments that have no products yet.
+  const have = new Set(categories.map((c) => c.slug));
+  const circles = [
+    ...categories.map((c) => ({ ...c, real: true })),
+    ...DEPARTMENTS.map((d, i) => ({ ...d, Icon: DEPT_ICONS[i], count: 0, real: false })).filter((d) => !have.has(d.slug)),
+  ];
+
   return (
     <>
-      <div className="mx-auto max-w-7xl px-3 pt-4 sm:px-4">
-        {banners.length > 0 ? (
-          <BannerCarousel banners={banners} />
-        ) : (
-          <section className="relative overflow-hidden rounded-2xl border border-line">
-            <Image src="/img/hero-banner.jpg" alt="" fill priority sizes="100vw" className="object-cover opacity-30" />
-            <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/80 to-transparent" />
-            <div className="relative px-5 py-10 sm:px-10 sm:py-16">
-              <h1 className="max-w-2xl text-4xl font-bold leading-[1.05] sm:text-6xl">Shop smart.<br />Shop halal.<br />Pay on delivery.</h1>
-              <p className="mt-4 max-w-lg text-dim sm:text-lg">Pakistani online store built on honest dealing. Pick a product, fill one short form, pay the rider when it arrives.</p>
-              <div className="mt-6 flex flex-wrap gap-3"><Link href="/products" className="btn-gold">Shop now</Link><InstallButton /></div>
-            </div>
-          </section>
-        )}
-        {banners.length > 0 && <h1 className="sr-only">Mizanora: online shopping in Pakistan with cash on delivery</h1>}
+      <div className="mx-auto max-w-7xl px-3 pt-3 sm:px-4 sm:pt-4">
+        <BannerCarousel banners={banners.length > 0 ? banners : DEFAULT_SLIDES} />
+        <h1 className="sr-only">Mizanora: online shopping market in Pakistan with cash on delivery</h1>
       </div>
 
       <ReorderBanner />
 
-      <section className="mx-auto max-w-7xl px-3 pt-5 sm:px-4" aria-label="Why shop with us">
-        <ul className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+      <section className="mx-auto max-w-7xl px-3 pt-4 sm:px-4" aria-label="Why shop with us">
+        <ul className="no-sb flex gap-2.5 overflow-x-auto lg:grid lg:grid-cols-4">
           {[[Banknote, 'Cash on delivery', 'Pay when you receive'], [Truck, delivery, 'Across Pakistan'], [Headphones, 'WhatsApp support', 'Help when you need it'], [ShieldCheck, 'Honest dealing', 'Price shown upfront']].map(([Icon, t, s]) => (
-            <li key={t} className="flex items-center gap-3 rounded-xl border border-line bg-surface p-3">
-              <Icon className="shrink-0 text-gold" size={24} />
-              <div><p className="text-sm font-semibold text-cream">{t}</p><p className="text-xs text-dim">{s}</p></div>
+            <li key={t} className="flex min-w-[58%] shrink-0 items-center gap-3 rounded-xl border border-line bg-surface p-3 sm:min-w-[40%] lg:min-w-0">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/10 text-gold"><Icon size={22} /></span>
+              <div><p className="text-sm font-bold text-cream">{t}</p><p className="text-xs text-dim">{s}</p></div>
             </li>
           ))}
         </ul>
       </section>
 
-      {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-3 pt-10 sm:px-4" aria-labelledby="cats">
-          <h2 id="cats" className="section-title mb-4">Shop by category</h2>
-          <ul className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {categories.map((c) => (
-              <li key={c.slug} className="shrink-0">
-                <Link href={`/category/${c.slug}`} className="block w-24 text-center sm:w-28">
-                  <span className="relative mx-auto block h-20 w-20 overflow-hidden rounded-full border-2 border-line bg-raised sm:h-24 sm:w-24">
-                    {c.image ? <Image src={c.image} alt="" fill sizes="96px" className="object-cover" /> : <span className="grid h-full place-items-center font-display text-3xl text-gold">{c.name[0]}</span>}
-                  </span>
-                  <span className="mt-2 block text-sm font-medium text-cream">{c.name}</span>
-                  <span className="block text-xs text-faint">{c.count} item{c.count > 1 ? 's' : ''}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+      <section className="mx-auto max-w-7xl px-3 pt-8 sm:px-4" aria-labelledby="cats">
+        <h2 id="cats" className="section-title mb-3">Shop by category</h2>
+        <ul className="no-sb flex gap-3 overflow-x-auto pb-2">
+          {circles.map((c) => (
+            <li key={c.slug} className="shrink-0">
+              <Link href={`/category/${c.slug}`} className="block w-[5.2rem] text-center sm:w-28">
+                <span className={`relative mx-auto grid h-[4.4rem] w-[4.4rem] place-items-center overflow-hidden rounded-full border-2 sm:h-24 sm:w-24 ${c.real ? 'border-gold bg-raised' : 'border-line bg-surface text-gold'}`}>
+                  {c.image ? <Image src={c.image} alt="" fill sizes="96px" className="object-cover" /> : c.Icon ? <c.Icon size={30} /> : <span className="font-display text-3xl text-gold">{c.name[0]}</span>}
+                </span>
+                <span className="mt-1.5 block text-xs font-semibold leading-tight text-cream sm:text-sm">{c.name}</span>
+                {c.real && <span className="block text-[0.7rem] text-faint">{c.count} item{c.count > 1 ? 's' : ''}</span>}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <Shelf id="deals" title="Hot deals" href="/products" products={deals} priorityFirst tone="bg-red-50 p-3 sm:p-4" />
+
+      {trend.length > 0 && (
+        <section className="mx-auto max-w-7xl px-3 pt-8 sm:px-4" aria-labelledby="trend">
+          <div className="mb-3 flex items-end justify-between"><h2 id="trend" className="section-title">Trending now</h2><Link href="/products" className="flex items-center gap-1 text-sm font-bold text-gold">See all <ArrowRight size={15} /></Link></div>
+          <Marquee seconds={Math.max(30, trend.length * 5)} label="Trending products" className="rounded-2xl">
+            {trend.map((p, i) => <div key={`${p.id}-${i}`} className="w-44 shrink-0 px-1.5 sm:w-52"><ProductCard p={p} /></div>)}
+          </Marquee>
         </section>
       )}
 
-      <Shelf id="deals" title="Hot deals" href="/products" products={deals} priorityFirst />
-      <Shelf id="picks" title="Top picks" href="/products" products={picks} />
+      <Shelf id="picks" title="Top picks for you" href="/products" products={picks} />
       <Shelf id="new" title="New arrivals" href="/products" products={fresh} priorityFirst={deals.length === 0 && picks.length === 0} />
       {shelves.map(({ c, items }) => <Shelf key={c.slug} id={`cat-${c.slug}`} title={c.name} href={`/category/${c.slug}`} products={items} />)}
 
@@ -116,18 +135,18 @@ export default async function Home() {
         <h2 id="how" className="section-title mb-4">Ordering takes one minute</h2>
         <ol className="grid gap-3 md:grid-cols-3">
           {[['Choose', 'Pick your product and size.'], ['Fill the form', 'Name, mobile number and address. No account needed.'], ['Pay on delivery', 'We confirm your order, then the rider brings it to your door.']].map(([t, s], i) => (
-            <li key={t} className="card flex gap-4"><span className="font-display text-4xl text-gold">{i + 1}</span><div><p className="font-semibold">{t}</p><p className="text-sm text-dim">{s}</p></div></li>
+            <li key={t} className="card flex gap-4"><span className="font-display text-4xl font-extrabold text-saffron">{i + 1}</span><div><p className="font-semibold">{t}</p><p className="text-sm text-dim">{s}</p></div></li>
           ))}
         </ol>
       </section>
 
       <section className="mx-auto max-w-7xl px-3 pt-14 sm:px-4" aria-labelledby="guides">
-        <h2 id="guides" className="section-title mb-4">Guides from the Mizanora blog</h2>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="mb-4 flex items-end justify-between"><h2 id="guides" className="section-title">Shopping guides and tips</h2><Link href="/blog" className="flex items-center gap-1 text-sm font-bold text-gold">All guides <ArrowRight size={15} /></Link></div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {posts.map((p) => (
             <article key={p.slug} className="card">
-              <h3 className="text-xl font-semibold"><Link href={`/blog/${p.slug}`}>{p.title}</Link></h3>
-              <p className="mt-2 text-sm text-dim">{p.description}</p>
+              <h3 className="text-lg font-bold leading-snug"><Link href={`/blog/${p.slug}`}>{p.title}</Link></h3>
+              <p className="mt-2 line-clamp-3 text-sm text-dim">{p.description}</p>
               <Link href={`/blog/${p.slug}`} className="mt-3 inline-block text-sm font-semibold text-gold">Read the guide ({p.mins} min)</Link>
             </article>
           ))}
@@ -158,6 +177,13 @@ export default async function Home() {
           </details>
         ))}
         <Link href="/faq" className="mt-3 inline-block text-sm font-semibold text-gold">More answers</Link>
+      </section>
+      <section className="mx-auto max-w-4xl px-4 pt-14" aria-labelledby="about-mz">
+        <h2 id="about-mz" className="section-title mb-3">Online shopping in Pakistan, made simple</h2>
+        <div className="space-y-3 text-[0.98rem] leading-7 text-dim">
+          <p>Mizanora is an online market for Pakistan. You can browse <Link href="/products" className="font-semibold text-gold underline underline-offset-4">all products</Link>, open a category, pick your size and order in about a minute. You pay in cash when the parcel reaches your door, so you never pay before you see what you ordered.</p>
+          <p>New to buying online? Start with our <Link href="/blog/online-shopping-in-pakistan-beginners-guide" className="font-semibold text-gold underline underline-offset-4">beginner's guide to online shopping in Pakistan</Link>, learn <Link href="/blog/cash-on-delivery-pakistan" className="font-semibold text-gold underline underline-offset-4">how cash on delivery works</Link> and <Link href="/blog/how-to-spot-fake-online-shops-pakistan" className="font-semibold text-gold underline underline-offset-4">how to spot fake online shops</Link>.</p>
+        </div>
       </section>
       <JsonLd data={faqJsonLd(FAQ.slice(0, 6))} />
     </>
