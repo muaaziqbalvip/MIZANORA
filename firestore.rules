@@ -2,26 +2,27 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Replace with the admin's UID (Firebase Console > Authentication > Users > "User UID")
+    // The admin can be recognised two ways (either one is enough):
+    //  1) the admin's UID (email + password login)  -> Firebase Console > Authentication > Users > "User UID"
+    //  2) a Google account whose email is verified   -> put the admin email(s) in the list below
     function isAdmin() {
-      return request.auth != null && request.auth.uid == 'PASTE_ADMIN_UID_HERE';
+      return request.auth != null && (
+        request.auth.uid == 'PASTE_ADMIN_UID_HERE' ||
+        (request.auth.token.email_verified == true && request.auth.token.email in ['PASTE_ADMIN_EMAIL_HERE@gmail.com'])
+      );
     }
 
-    // Anyone can read the catalog. Only the admin can change it.
-    match /products/{productId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
+    // Anyone can read the catalog and banners. Only the admin can change them.
+    match /products/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /banners/{id}  { allow read: if true; allow write: if isAdmin(); }
 
     // Orders are created ONLY by the server (/api/orders uses the Admin SDK, which bypasses these rules).
     // Browsers can never create, read or edit orders. Only the admin can read and update them.
-    match /orders/{orderId} {
+    match /orders/{id} {
       allow read, update: if isAdmin();
       allow create, delete: if false;
     }
 
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

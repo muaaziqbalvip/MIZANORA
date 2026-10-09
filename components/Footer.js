@@ -2,14 +2,14 @@ import Link from 'next/link';
 import { SITE } from '@/lib/config';
 import { SOCIAL_ICONS } from './Icons';
 
-export default function Footer() {
+export default function Footer({ categories = [] }) {
   const socials = SITE.social.filter((s) => s.url);
   return (
-    <footer className="mt-16 border-t border-line bg-surface pb-24 pt-10">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
+    <footer className="mt-16 border-t border-line bg-surface pb-28 pt-10 md:pb-10">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="lg:col-span-2">
           <p className="font-display text-2xl font-bold tracking-[0.14em]">MIZANORA</p>
-          <p className="mt-3 max-w-xs text-sm text-dim">{SITE.tagline} A Pakistani online store built on honest dealing. Cash on delivery across Pakistan.</p>
+          <p className="mt-3 max-w-sm text-sm text-dim">{SITE.tagline} A Pakistani online store built on honest dealing. Cash on delivery across Pakistan. WhatsApp support is always here to help.</p>
           <div className="mt-4 flex gap-3">
             {socials.map((s) => {
               const Icon = SOCIAL_ICONS[s.id];
@@ -17,11 +17,11 @@ export default function Footer() {
             })}
           </div>
         </div>
-        <FooterCol title="Shop" links={[['/products', 'All products'], ['/cart', 'Cart'], ['/how-to-order', 'How to order'], ['/faq', 'FAQ']]} />
-        <FooterCol title="Learn" links={[['/blog', 'Blog'], ['/about', 'About us'], ['/contact', 'Contact'], ['/returns', 'Returns']]} />
-        <FooterCol title="Legal" links={[['/privacy-policy', 'Privacy policy'], ['/terms', 'Terms of use'], ['/connect', 'Official accounts']]} />
+        <FooterCol title="Shop" links={[['/products', 'All products'], ...categories.slice(0, 5).map((c) => [`/category/${c.slug}`, c.name]), ['/cart', 'Cart']]} />
+        <FooterCol title="Help" links={[['/how-to-order', 'How to order'], ['/faq', 'FAQ'], ['/returns', 'Returns'], ['/contact', 'Contact support'], ['/connect', 'Official accounts']]} />
+        <FooterCol title="Company" links={[['/about', 'About us'], ['/blog', 'Blog'], ['/privacy-policy', 'Privacy policy'], ['/terms', 'Terms of use']]} />
       </div>
-      <p className="mx-auto mt-8 max-w-6xl border-t border-line px-4 pt-5 text-xs text-faint">© {new Date().getFullYear()} Mizanora, {SITE.city}.</p>
+      <p className="mx-auto mt-8 max-w-7xl border-t border-line px-4 pt-5 text-xs text-faint">© {new Date().getFullYear()} Mizanora, {SITE.city}.</p>
     </footer>
   );
 }

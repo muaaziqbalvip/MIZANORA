@@ -1,11 +1,14 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import ProductCard from './ProductCard';
 
 // Search + sort run in the browser, so /products stays a fast, fully static (SEO-friendly) page.
 export default function ProductGrid({ products }) {
-  const [q, setQ] = useState('');
+  const sp = useSearchParams();
+  const [q, setQ] = useState(sp.get('q') || '');
+  useEffect(() => { setQ(sp.get('q') || ''); }, [sp]);
   const [sort, setSort] = useState('new');
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -35,7 +38,7 @@ export default function ProductGrid({ products }) {
       {list.length === 0 ? (
         <p className="rounded-2xl border border-line bg-surface p-8 text-center text-dim">No products found.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
           {list.map((p, i) => <ProductCard key={p.id} p={p} priority={i < 4} />)}
         </div>
       )}

@@ -24,10 +24,10 @@ const newOrderId = () => `MZ-${crypto.randomBytes(4).toString('hex').toUpperCase
 const fail = (msg, status = 400) => NextResponse.json({ ok: false, error: msg }, { status });
 
 export async function POST(req) {
-  if (!adminReady()) return fail('The store is not fully set up yet. Please order on WhatsApp.', 503);
+  if (!adminReady()) return fail('The store is not fully set up yet. Please contact support on WhatsApp.', 503);
 
   const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown';
-  if (limited(ip)) return fail('Too many orders from this connection. Please wait a few minutes or order on WhatsApp.', 429);
+  if (limited(ip)) return fail('Too many orders from this connection. Please wait a few minutes or contact support on WhatsApp.', 429);
 
   let body;
   try { body = await req.json(); } catch { return fail('Invalid request'); }
@@ -97,6 +97,6 @@ export async function POST(req) {
     });
   } catch (e) {
     console.error('order failed', e);
-    return fail('We could not place your order right now. Please try again, or order on WhatsApp.', 500);
+    return fail('We could not place your order right now. Please try again, or contact support on WhatsApp.', 500);
   }
 }

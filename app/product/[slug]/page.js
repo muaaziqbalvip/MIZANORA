@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Banknote, ShieldCheck, Truck } from 'lucide-react';
+import { Banknote, Headphones, ShieldCheck, Truck } from 'lucide-react';
 import { SITE, absUrl } from '@/lib/config';
 import { getProduct, getProducts } from '@/lib/products';
-import { formatPKR, discountPct } from '@/lib/format';
+import { formatPKR, discountPct, slugify } from '@/lib/format';
 import { pageMeta, breadcrumbJsonLd } from '@/lib/seo';
 import Gallery from '@/components/Gallery';
 import ProductActions from '@/components/ProductActions';
@@ -66,9 +66,9 @@ export default async function ProductPage({ params }) {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-4 pt-6">
+      <div className="mx-auto max-w-7xl px-3 pt-6 sm:px-4">
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-faint">
-          <Link href="/" className="hover:text-gold">Home</Link> / <Link href="/products" className="hover:text-gold">Products</Link> / {p.name}
+          <Link href="/" className="hover:text-gold">Home</Link> / <Link href="/products" className="hover:text-gold">Products</Link> / {p.category && <><Link href={`/category/${slugify(p.category)}`} className="hover:text-gold">{p.category}</Link> / </>}{p.name}
         </nav>
         <div className="grid gap-8 lg:grid-cols-2">
           <Gallery images={p.images} name={p.name} />
@@ -81,10 +81,11 @@ export default async function ProductPage({ params }) {
             </p>
             <p className="mt-1 text-sm text-dim">{SITE.shippingFee > 0 ? `Delivery ${formatPKR(SITE.shippingFee)}` : 'Free delivery'} · Cash on delivery</p>
             <ProductActions product={p} />
-            <ul className="mt-6 grid gap-2.5 text-sm text-dim">
+            <ul className="mt-6 grid gap-2.5 rounded-2xl border border-line bg-surface p-4 text-sm text-dim">
               <li className="flex items-center gap-2.5"><Banknote size={18} className="text-gold" /> Pay cash when the parcel arrives</li>
               <li className="flex items-center gap-2.5"><Truck size={18} className="text-gold" /> Delivery across Pakistan</li>
-              <li className="flex items-center gap-2.5"><ShieldCheck size={18} className="text-gold" /> We confirm your order on WhatsApp before dispatch</li>
+              <li className="flex items-center gap-2.5"><ShieldCheck size={18} className="text-gold" /> We confirm your order by phone or message before dispatch</li>
+              <li className="flex items-center gap-2.5"><Headphones size={18} className="text-gold" /> <span>Questions? <Link href="/contact" className="text-gold underline underline-offset-4">WhatsApp support</Link> and <Link href="/returns" className="text-gold underline underline-offset-4">returns info</Link></span></li>
             </ul>
           </div>
         </div>
@@ -99,7 +100,7 @@ export default async function ProductPage({ params }) {
         {related.length > 0 && (
           <section className="mt-12" aria-labelledby="rel">
             <h2 id="rel" className="section-title mb-5">You may also like</h2>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">{related.map((r) => <ProductCard key={r.id} p={r} />)}</div>
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-4">{related.map((r) => <ProductCard key={r.id} p={r} />)}</div>
           </section>
         )}
         <p className="mt-10 text-sm text-dim">

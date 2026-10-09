@@ -6,7 +6,7 @@ import JsonLd from '@/components/JsonLd';
 
 export const metadata = pageMeta({
   title: 'About Mizanora, a Halal-Minded Pakistani Store',
-  description: 'Mizanora is a Pakistani online store built on honest dealing, clear prices and direct WhatsApp service. Learn what we stand for.',
+  description: 'Mizanora is a Pakistani online store built on honest dealing, clear prices and friendly WhatsApp support. Learn what we stand for.',
   path: '/about',
 });
 
@@ -18,7 +18,7 @@ export default function About() {
         <h2>Who we are</h2>
         <p>Mizanora is a Pakistani online store based in {SITE.city}. We sell quality products and deliver across Pakistan. Our name is our promise: <em>mizan</em> means balance and fairness.</p>
         <h2>How we work</h2>
-        <p>You choose a product and place your order in one short form. You pay cash on delivery. Before we dispatch, we confirm the order with you on WhatsApp, so there are no surprises. You can also order directly by messaging us.</p>
+        <p>You choose a product and place your order in one short form. You pay cash on delivery. Before we dispatch, we confirm the order with you by phone or message, so there are no surprises. If you need help at any time, our WhatsApp support team is there for you.</p>
         <h2>What we stand for</h2>
         <ul>
           <li><strong>Honest descriptions.</strong> Products are described as they are.</li>

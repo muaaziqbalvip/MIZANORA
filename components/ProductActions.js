@@ -6,6 +6,7 @@ import { Check, Minus, Plus, ShoppingBag, Zap } from 'lucide-react';
 import { useCart } from './CartProvider';
 import { addToCart } from '@/lib/metaPixel';
 import { waLink } from '@/lib/config';
+import { formatPKR } from '@/lib/format';
 import { WhatsAppIcon } from './Icons';
 import InstallButton from './InstallButton';
 
@@ -19,17 +20,23 @@ export default function ProductActions({ product }) {
   const needSize = product.sizes.length > 0;
 
   const ok = () => {
-    if (needSize && !size) { setErr('Please select a size first'); return false; }
+    if (needSize && !size) {
+      setErr('Please select a size first');
+      document.getElementById('size-picker')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
+    }
     setErr('');
     return true;
   };
   const put = () => { add(product, { size, qty }); addToCart(product, qty); };
+  const buyNow = () => { if (ok()) { put(); router.push('/checkout'); } };
 
   if (!product.inStock) {
     return (
       <div className="mt-6 rounded-2xl border border-line bg-surface p-4">
         <p className="font-semibold text-cream">Currently sold out</p>
-        <a className="btn-wa mt-3 w-full" href={waLink(`Assalam o Alaikum, please tell me when "${product.name}" is back in stock.`)} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={20} /> Ask on WhatsApp</a>
+        <p className="mt-1 text-sm text-dim">Ask our support team when it will be back.</p>
+        <a className="btn-wa mt-3 w-full" href={waLink(`Assalam o Alaikum, when will "${product.name}" be back in stock?`)} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={20} /> Ask support on WhatsApp</a>
       </div>
     );
   }
@@ -37,8 +44,8 @@ export default function ProductActions({ product }) {
   return (
     <div className="mt-6">
       {needSize && (
-        <fieldset>
-          <legend className="mb-2 text-sm font-semibold text-cream">Size</legend>
+        <fieldset id="size-picker">
+          <legend className="mb-2 text-sm font-semibold text-cream">Select size</legend>
           <div className="flex flex-wrap gap-2">
             {product.sizes.map((s) => (
               <button key={s} type="button" onClick={() => { setSize(s); setErr(''); }} aria-pressed={size === s}
@@ -58,17 +65,9 @@ export default function ProductActions({ product }) {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3">
-        <button type="button" className="btn-gold" onClick={() => { if (ok()) { put(); router.push('/checkout'); } }}>
-          <Zap size={18} /> Order now, pay on delivery
-        </button>
-        <button type="button" className="btn-ghost" onClick={() => { if (ok()) { put(); setAdded(true); } }}>
-          <ShoppingBag size={18} /> Add to cart
-        </button>
-        <a className="btn-wa" target="_blank" rel="noopener noreferrer"
-          href={waLink(`Assalam o Alaikum, I want to order: ${product.name}${size ? `, size ${size}` : ''}, quantity ${qty}. City: `)}>
-          <WhatsAppIcon size={20} /> Order on WhatsApp
-        </a>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <button type="button" className="btn-gold" onClick={buyNow}><Zap size={18} /> Buy now, pay on delivery</button>
+        <button type="button" className="btn-ghost" onClick={() => { if (ok()) { put(); setAdded(true); } }}><ShoppingBag size={18} /> Add to cart</button>
       </div>
 
       {added && (
@@ -81,6 +80,15 @@ export default function ProductActions({ product }) {
           <InstallButton className="mt-3" full />
         </div>
       )}
+
+      {/* Phone only: sticky buy bar, like big marketplaces */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-line bg-ink/95 px-3 py-2.5 backdrop-blur md:hidden">
+        <div className="min-w-0">
+          <p className="text-lg font-bold leading-tight text-gold">{formatPKR(product.price * qty)}</p>
+          <p className="text-[0.7rem] text-dim">Cash on delivery</p>
+        </div>
+        <button type="button" onClick={buyNow} className="btn-gold ml-auto !px-6 !py-3"><Zap size={18} /> Buy now</button>
+      </div>
     </div>
   );
 }

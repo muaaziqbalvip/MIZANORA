@@ -5,7 +5,7 @@ import { SOCIAL_ICONS } from '@/components/Icons';
 
 export const metadata = pageMeta({
   title: 'Official Mizanora Accounts',
-  description: 'All official Mizanora links in one place: WhatsApp catalog, Instagram, Facebook, TikTok and YouTube.',
+  description: 'All official Mizanora links in one place: WhatsApp support, Instagram, Facebook, TikTok and YouTube.',
   path: '/connect',
 });
 

@@ -1,9 +1,11 @@
 import './globals.css';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
 import { SITE } from '@/lib/config';
+import { getCategories } from '@/lib/products';
 import { orgJsonLd, websiteJsonLd } from '@/lib/seo';
 import { CartProvider } from '@/components/CartProvider';
 import { InstallProvider } from '@/components/InstallProvider';
+import AnnouncementBar from '@/components/AnnouncementBar';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import WhatsAppFab from '@/components/WhatsAppFab';
@@ -35,15 +37,17 @@ export const metadata = {
   formatDetection: { telephone: false },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const categories = await getCategories();
   return (
     <html lang="en-PK" className={`${display.variable} ${body.variable}`}>
       <body>
         <CartProvider>
           <InstallProvider>
-            <Header />
+            <AnnouncementBar />
+            <Header categories={categories} />
             <main id="main">{children}</main>
-            <Footer />
+            <Footer categories={categories} />
             <WhatsAppFab />
             <InstallBanner />
           </InstallProvider>

@@ -51,4 +51,4 @@ In honest trade, both sides keep their promise. The seller sends what was descri
 
 ## COD at Mizanora
 
-Every Mizanora order is cash on delivery. Pick your product, fill one short form, and pay the rider when the parcel arrives. We confirm your order on WhatsApp before dispatch. See [how to order](/how-to-order) for the simple steps.
+Every Mizanora order is cash on delivery. Pick your product, fill one short form, and pay the rider when the parcel arrives. We confirm your order by phone or message before dispatch. See [how to order](/how-to-order) for the simple steps.

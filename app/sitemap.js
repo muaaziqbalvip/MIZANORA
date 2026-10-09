@@ -1,5 +1,5 @@
 import { absUrl } from '@/lib/config';
-import { getProducts } from '@/lib/products';
+import { getProducts, buildCategories } from '@/lib/products';
 import { getPosts } from '@/lib/blog';
 
 export const revalidate = 3600;
@@ -15,6 +15,7 @@ export default async function sitemap() {
   ].map(([p, priority, changeFrequency]) => ({ url: absUrl(p), lastModified: now, changeFrequency, priority }));
   return [
     ...fixed,
+    ...buildCategories(products).map((c) => ({ url: absUrl(`/category/${c.slug}`), lastModified: now, changeFrequency: 'weekly', priority: 0.8 })),
     ...products.map((p) => ({ url: absUrl(`/product/${p.slug}`), lastModified: new Date(p.updatedAt || p.createdAt || now), changeFrequency: 'weekly', priority: 0.9 })),
     ...posts.map((p) => ({ url: absUrl(`/blog/${p.slug}`), lastModified: new Date(p.date), changeFrequency: 'monthly', priority: 0.7 })),
   ];

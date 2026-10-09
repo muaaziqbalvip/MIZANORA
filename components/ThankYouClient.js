@@ -27,8 +27,8 @@ export default function ThankYouClient() {
   const orderId = order ? order.orderId : id;
   const lines = order ? order.items.map((i) => `${i.name}${i.size ? ` (size ${i.size})` : ''} x${i.qty}`).join(', ') : '';
   const msg = order
-    ? `Assalam o Alaikum, I placed order ${order.orderId} on Mizanora.\nName: ${order.customer.name}\nItems: ${lines}\nTotal (COD): ${formatPKR(order.total)}\nCity: ${order.customer.city}\nPlease confirm my order.`
-    : `Assalam o Alaikum, I placed order ${orderId} on Mizanora. Please confirm my order.`;
+    ? `Assalam o Alaikum, I placed order ${order.orderId} on Mizanora.\nName: ${order.customer.name}\nItems: ${lines}\nTotal (COD): ${formatPKR(order.total)}\nCity: ${order.customer.city}\nI need help with this order.`
+    : `Assalam o Alaikum, I placed order ${orderId} on Mizanora and need help.`;
 
   return (
     <div>
@@ -38,10 +38,11 @@ export default function ThankYouClient() {
         {orderId && <p className="mt-2 text-dim">Your order ID is <b className="text-cream">{orderId}</b></p>}
       </div>
 
-      <a href={waLink(msg)} target="_blank" rel="noopener noreferrer" className="btn-wa mt-6 w-full !py-4 text-base">
-        <WhatsAppIcon size={22} /> Verify via WhatsApp
+      <p className="mt-4 rounded-xl border border-line bg-surface p-4 text-center text-dim">We will call or message <b className="text-cream">{order ? order.customer.phone : 'your number'}</b> to confirm your order. Please keep your phone nearby.</p>
+      <a href={waLink(msg)} target="_blank" rel="noopener noreferrer" className="btn-wa mt-4 w-full">
+        <WhatsAppIcon size={22} /> Chat with support about this order
       </a>
-      <p className="mt-2 text-center text-sm text-dim">Tap the button to send your order details to us. This is the fastest way to get your order confirmed and dispatched.</p>
+      <p className="mt-2 text-center text-xs text-faint">WhatsApp is for support only. Your order is already placed.</p>
 
       {order && (
         <div className="card mt-6">

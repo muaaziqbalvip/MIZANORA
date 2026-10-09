@@ -12,7 +12,6 @@ const nextConfig = {
     const toProducts = ['shop', 'account', 'wishlist', 'categories', 'new-arrivals', 'best-sellers', 'offers', 'search'];
     return [
       ...toProducts.map((s) => ({ source: `/${s}`, destination: '/products', permanent: true })),
-      { source: '/category/:slug*', destination: '/products', permanent: true },
       { source: '/order-success', destination: '/thank-you', permanent: true },
       { source: '/track-order', destination: '/how-to-order', permanent: true },
     ];

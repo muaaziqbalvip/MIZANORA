@@ -105,7 +105,7 @@ export default function AdminProducts() {
           <div><label className="label" htmlFor="pp">Price (PKR)</label><input id="pp" type="number" min="1" className="input" value={form.price} onChange={set('price')} required /></div>
           <div><label className="label" htmlFor="pc">Old price</label><input id="pc" type="number" min="0" className="input" value={form.comparePrice} onChange={set('comparePrice')} /></div>
         </div>
-        <div><label className="label" htmlFor="pk">Category</label><input id="pk" className="input" value={form.category} onChange={set('category')} /></div>
+        <div><label className="label" htmlFor="pk">Category</label><input id="pk" list="cats" className="input" value={form.category} onChange={set('category')} placeholder="e.g. Footwear" /><datalist id="cats">{[...new Set((list || []).map((x) => x.category).filter(Boolean))].map((c) => <option key={c} value={c} />)}</datalist></div>
         <div><label className="label" htmlFor="pd">Description</label><textarea id="pd" rows={5} className="input" value={form.description} onChange={set('description')} /></div>
         <div><label className="label" htmlFor="pi">Image links (one per line)</label><textarea id="pi" rows={3} className="input" value={form.images} onChange={set('images')} placeholder="https://..." /></div>
         <div><label className="label" htmlFor="pz">Sizes (comma separated, optional)</label><input id="pz" className="input" value={form.sizes} onChange={set('sizes')} placeholder="40, 41, 42, 43" /></div>

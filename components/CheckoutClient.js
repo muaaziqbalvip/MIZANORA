@@ -76,7 +76,7 @@ export default function CheckoutClient() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || 'We could not place your order. Please try again, or order on WhatsApp.');
+      if (!res.ok || !data.ok) throw new Error(data.error || 'We could not place your order. Please try again, or contact support.');
       try {
         localStorage.setItem('mz_last_order', JSON.stringify(data.order));
         localStorage.setItem('mz_customer', JSON.stringify({
@@ -117,7 +117,7 @@ export default function CheckoutClient() {
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold">Delivery details</h2>
         {field('name', 'Full name', { autoComplete: 'name', placeholder: 'e.g. Ahmed Ali' })}
-        {field('phone', 'WhatsApp / mobile number', { type: 'tel', inputMode: 'tel', autoComplete: 'tel', placeholder: '0300-1234567' }, 'We will confirm your order on this number.')}
+        {field('phone', 'Mobile number', { type: 'tel', inputMode: 'tel', autoComplete: 'tel', placeholder: '0300-1234567' }, 'We will call or message this number to confirm your order.')}
         <div>
           <label htmlFor="address" className="label">Complete street address</label>
           <textarea id="address" name="address" rows={3} value={form.address} onChange={set('address')} autoComplete="street-address"
@@ -177,13 +177,13 @@ export default function CheckoutClient() {
         {serverError && (
           <div role="alert" className="rounded-xl border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-300">
             {serverError}{' '}
-            <a className="underline" href={waLink('Assalam o Alaikum, I could not place my order on the website.')} target="_blank" rel="noopener noreferrer">Order on WhatsApp instead</a>
+            <a className="underline" href={waLink('Assalam o Alaikum, I need help placing my order on the website.')} target="_blank" rel="noopener noreferrer">Contact support</a>
           </div>
         )}
         <button type="submit" disabled={busy} className="btn-gold w-full !py-4 text-base">
           {busy ? <><Loader2 className="animate-spin" size={20} /> Placing order...</> : `Place order · ${formatPKR(total)}`}
         </button>
-        <p className="text-center text-xs text-faint">Cash on delivery. We will confirm your order on WhatsApp before dispatch.</p>
+        <p className="text-center text-xs text-faint">Cash on delivery. We will confirm your order by phone or message before dispatch. WhatsApp is for support only.</p>
       </aside>
     </form>
   );

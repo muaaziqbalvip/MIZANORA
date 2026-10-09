@@ -62,4 +62,4 @@ This article is a general guide and not a religious ruling (fatwa). If you have 
 
 ## What halal shopping means at Mizanora
 
-For us, "Shop Smart. Shop Halal." is a standard we hold ourselves to. We describe products as they are, give you the price before you commit, and talk to you directly on WhatsApp so you can ask anything. Read more on our [About page](/about), or see [how to order](/how-to-order).
+For us, "Shop Smart. Shop Halal." is a standard we hold ourselves to. We describe products as they are, give you the price before you commit, and keep a WhatsApp support team so you can ask anything. Read more on our [About page](/about), or see [how to order](/how-to-order).

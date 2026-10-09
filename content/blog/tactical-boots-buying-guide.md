@@ -76,4 +76,4 @@ A good pair lasts longer with simple care. See our guide on [how to care for you
 
 ## Ordering tactical boots from Mizanora
 
-You can order tactical boots on our [products page](/products) with cash on delivery, or ask us on [WhatsApp](/how-to-order). If you are unsure about size, send us your foot length and we will help you choose.
+You can order tactical boots on our [products page](/products) with cash on delivery, or ask our WhatsApp support team through the [contact page](/contact). If you are unsure about size, send them your foot length and they will help you choose.

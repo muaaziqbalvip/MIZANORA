@@ -71,4 +71,4 @@ If your boots have a side zip, brush out dust and keep it clean so it moves free
 
 ## Choosing boots that last
 
-Care helps, but the quality of the boot matters too. Read our [tactical boots buying guide](/blog/tactical-boots-buying-guide) to learn what to look for, and ask us about boots on [WhatsApp](/how-to-order).
+Care helps, but the quality of the boot matters too. Read our [tactical boots buying guide](/blog/tactical-boots-buying-guide) to learn what to look for, and see our [products page](/products) for boots with cash on delivery.
