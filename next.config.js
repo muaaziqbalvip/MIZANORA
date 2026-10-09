@@ -9,11 +9,11 @@ const nextConfig = {
   },
   async redirects() {
     // Old store URLs -> new pages (keeps Google rankings and old links alive)
-    const toProducts = ['shop', 'account', 'wishlist', 'categories', 'new-arrivals', 'best-sellers', 'offers', 'search'];
+    const toProducts = ['shop', 'categories', 'new-arrivals', 'best-sellers', 'offers', 'search'];
     return [
       ...toProducts.map((s) => ({ source: `/${s}`, destination: '/products', permanent: true })),
       { source: '/order-success', destination: '/thank-you', permanent: true },
-      { source: '/track-order', destination: '/how-to-order', permanent: true },
+      { source: '/track-order', destination: '/track', permanent: true },
     ];
   },
   async headers() {

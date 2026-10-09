@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin, Tag } from 'lucide-react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { authClient, dbClient } from '@/lib/firebase-client';
+import { useAuth } from './AuthProvider';
+import { rememberOrder } from '@/lib/orders-local';
 import { useCart } from './CartProvider';
 import { SITE, waLink } from '@/lib/config';
 import { CITIES, CITY_PROVINCE, PROVINCES } from '@/lib/constants';
@@ -20,11 +24,20 @@ export default function CheckoutClient() {
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState('');
+  const { user } = useAuth();
+  const [addrs, setAddrs] = useState([]);
+  const [pick, setPick] = useState('');
+  const [saveAddr, setSaveAddr] = useState(true);
+  const [label, setLabel] = useState('Home');
+  const [code, setCode] = useState('');
+  const [coupon, setCoupon] = useState(null);
+  const [couponMsg, setCouponMsg] = useState('');
   const fired = useRef(false);
   const formRef = useRef(null);
 
   const shipping = items.length ? SITE.shippingFee : 0;
-  const total = subtotal + shipping;
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = subtotal - discount + shipping;
 
   // Returning customers: fill in the details they used last time (stored only on their own device).
   useEffect(() => {
@@ -33,6 +46,38 @@ export default function CheckoutClient() {
       if (saved) setForm((f) => ({ ...f, ...saved }));
     } catch (_) {}
   }, []);
+
+  // Signed-in customers: load saved addresses and pick the default one.
+  useEffect(() => {
+    if (!user) { setAddrs([]); return undefined; }
+    let live = true;
+    getDoc(doc(dbClient(), 'users', user.uid)).then((s) => {
+      if (!live || !s.exists()) return;
+      const d = s.data();
+      const list = Array.isArray(d.addresses) ? d.addresses : [];
+      setAddrs(list);
+      const def = list.find((a) => a.id === d.defaultAddressId) || list[0];
+      if (def) chooseAddr(def);
+    }).catch(() => {});
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  function chooseAddr(a) {
+    setPick(a.id);
+    setSaveAddr(false);
+    setForm((f) => ({ ...f, name: a.name, phone: a.phone, address: a.address, landmark: a.landmark || '', city: CITIES.includes(a.city) ? a.city : 'Other', cityOther: CITIES.includes(a.city) ? '' : a.city, province: a.province }));
+  }
+
+  async function applyCoupon() {
+    setCouponMsg('');
+    try {
+      const r = await fetch('/api/coupon', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, items: items.map((i) => ({ id: i.id, qty: i.qty })) }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) { setCoupon(null); setCouponMsg(d.error || 'Could not apply this coupon.'); return; }
+      setCoupon(d); setCouponMsg(`Coupon ${d.code} applied: ${d.label}.`);
+    } catch { setCouponMsg('Could not check the coupon. Try again.'); }
+  }
 
   useEffect(() => {
     if (ready && items.length && !fired.current) {
@@ -65,10 +110,13 @@ export default function CheckoutClient() {
     setServerError('');
     setBusy(true);
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (user) { try { headers.Authorization = `Bearer ${await authClient().currentUser.getIdToken()}`; } catch (_) {} }
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
+          coupon: coupon ? coupon.code : '',
           customer: clean,
           items: items.map((i) => ({ id: i.id, size: i.size || '', qty: i.qty })),
           website: form.website, // honeypot: real people leave it empty
@@ -79,11 +127,19 @@ export default function CheckoutClient() {
       if (!res.ok || !data.ok) throw new Error(data.error || 'We could not place your order. Please try again, or contact support.');
       try {
         localStorage.setItem('mz_last_order', JSON.stringify(data.order));
+        rememberOrder(data.order);
         localStorage.setItem('mz_customer', JSON.stringify({
           name: form.name, phone: form.phone, address: form.address, landmark: form.landmark,
           city: form.city, cityOther: form.cityOther, province: form.province,
         }));
       } catch (_) {}
+      if (user && saveAddr) {
+        try {
+          const rec = { id: `a${Date.now().toString(36)}`, label, name: clean.name, phone: clean.phone, address: clean.address, landmark: clean.landmark, city: clean.city, province: clean.province };
+          const next = [...addrs, rec];
+          await setDoc(doc(dbClient(), 'users', user.uid), { addresses: next, ...(addrs.length ? {} : { defaultAddressId: rec.id }), updatedAtMs: Date.now() }, { merge: true });
+        } catch (_) { /* the order is already placed; saving the address is optional */ }
+      }
       clear();
       router.push(`/thank-you?id=${encodeURIComponent(data.order.orderId)}`);
     } catch (err) {
@@ -115,7 +171,17 @@ export default function CheckoutClient() {
   return (
     <form ref={formRef} onSubmit={submit} noValidate className="grid gap-8 lg:grid-cols-[1fr_22rem]">
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">Delivery details</h2>
+        <h2 className="text-2xl font-extrabold">Delivery details</h2>
+        {!user && <p className="rounded-xl bg-gold/10 p-3 text-sm text-dim"><Link href="/account" className="font-bold text-gold underline underline-offset-4">Sign in</Link> to use saved addresses and see this order in your history. You can also order as a guest.</p>}
+        {addrs.length > 0 && (
+          <div>
+            <p className="label flex items-center gap-1.5"><MapPin size={15} /> Deliver to a saved address</p>
+            <div className="flex flex-wrap gap-2">
+              {addrs.map((a) => <button key={a.id} type="button" onClick={() => chooseAddr(a)} className={`rounded-xl border px-3 py-2 text-left text-sm ${pick === a.id ? 'border-gold bg-gold/10' : 'border-line bg-surface'}`}><b className="block">{a.label}</b><span className="block max-w-[14rem] truncate text-xs text-dim">{a.address}, {a.city}</span></button>)}
+              <button type="button" onClick={() => { setPick(''); setSaveAddr(true); setForm((f) => ({ ...EMPTY, notes: f.notes })); }} className="rounded-xl border border-dashed border-line px-3 py-2 text-sm font-semibold text-gold">+ New address</button>
+            </div>
+          </div>
+        )}
         {field('name', 'Full name', { autoComplete: 'name', placeholder: 'e.g. Ahmed Ali' })}
         {field('phone', 'Mobile number', { type: 'tel', inputMode: 'tel', autoComplete: 'tel', placeholder: '0300-1234567' }, 'We will call or message this number to confirm your order.')}
         <div>
@@ -146,6 +212,12 @@ export default function CheckoutClient() {
           </div>
         </div>
         {form.city === 'Other' && field('cityOther', 'Your city name', { placeholder: 'Type your city' })}
+        {user && !pick && (
+          <div className="flex flex-wrap items-center gap-3 rounded-xl bg-raised p-3 text-sm">
+            <label className="flex items-center gap-2"><input type="checkbox" checked={saveAddr} onChange={(e) => setSaveAddr(e.target.checked)} className="h-4 w-4 accent-[#0B6B45]" /> Save this address to my account as</label>
+            <select value={label} onChange={(e) => setLabel(e.target.value)} className="rounded-lg border border-line bg-white px-2 py-1"><option>Home</option><option>Work</option><option>Other</option></select>
+          </div>
+        )}
         <div>
           <label htmlFor="notes" className="label">Order notes (optional)</label>
           <textarea id="notes" name="notes" rows={2} value={form.notes} onChange={set('notes')} className="input" placeholder="Anything we should know?" />
@@ -170,18 +242,24 @@ export default function CheckoutClient() {
           </ul>
           <dl className="mt-4 space-y-2 border-t border-line pt-3 text-sm">
             <div className="flex justify-between"><dt className="text-dim">Subtotal</dt><dd>{formatPKR(subtotal)}</dd></div>
+            {discount > 0 && <div className="flex justify-between text-gold"><dt>Discount ({coupon.code})</dt><dd>- {formatPKR(discount)}</dd></div>}
             <div className="flex justify-between"><dt className="text-dim">Delivery</dt><dd>{shipping > 0 ? formatPKR(shipping) : 'Free'}</dd></div>
             <div className="flex justify-between text-base font-bold"><dt>Pay on delivery</dt><dd className="text-gold">{formatPKR(total)}</dd></div>
           </dl>
+          <div className="mt-4 border-t border-line pt-3">
+            <label htmlFor="cpn" className="label flex items-center gap-1.5"><Tag size={15} /> Coupon code</label>
+            <div className="flex gap-2"><input id="cpn" className="input !py-2.5 uppercase" value={code} onChange={(e) => setCode(e.target.value)} placeholder="e.g. WELCOME10" /><button type="button" onClick={applyCoupon} disabled={!code.trim()} className="btn-ghost !px-4 !py-2.5 text-sm">Apply</button></div>
+            {couponMsg && <p role="status" className={`mt-1.5 text-xs ${coupon ? 'font-semibold text-gold' : 'text-red-600'}`}>{couponMsg}</p>}
+          </div>
         </div>
         {serverError && (
-          <div role="alert" className="rounded-xl border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-300">
+          <div role="alert" className="rounded-xl border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-700">
             {serverError}{' '}
             <a className="underline" href={waLink('Assalam o Alaikum, I need help placing my order on the website.')} target="_blank" rel="noopener noreferrer">Contact support</a>
           </div>
         )}
         <button type="submit" disabled={busy} className="btn-gold w-full !py-4 text-base">
-          {busy ? <><Loader2 className="animate-spin" size={20} /> Placing order...</> : `Place order · ${formatPKR(total)}`}
+          {busy ? <><Loader2 className="animate-spin" size={20} /> Placing order...</> : `Confirm order · ${formatPKR(total)}`}
         </button>
         <p className="text-center text-xs text-faint">Cash on delivery. We will confirm your order by phone or message before dispatch. WhatsApp is for support only.</p>
       </aside>

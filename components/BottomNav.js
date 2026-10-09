@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, Home, LayoutGrid, Headphones, ShoppingBag } from 'lucide-react';
+import { BookOpen, Home, LayoutGrid, ShoppingBag, UserRound } from 'lucide-react';
 import { useCart } from './CartProvider';
 
 // Phone-app style tab bar. Hidden on desktop and on /admin.
@@ -10,7 +10,7 @@ export default function BottomNav() {
   const { count } = useCart();
   if (path.startsWith('/admin')) return null;
   const tabs = [
-    ['/', 'Home', Home], ['/products', 'Shop', LayoutGrid], ['/blog', 'Blog', BookOpen], ['/cart', 'Cart', ShoppingBag], ['/contact', 'Support', Headphones],
+    ['/', 'Home', Home], ['/products', 'Shop', LayoutGrid], ['/blog', 'Blog', BookOpen], ['/cart', 'Cart', ShoppingBag], ['/account', 'Account', UserRound],
   ];
   const on = (h) => (h === '/' ? path === '/' : path.startsWith(h));
   return (

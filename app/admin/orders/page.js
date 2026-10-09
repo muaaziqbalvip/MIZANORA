@@ -9,10 +9,10 @@ import { normalizePhone } from '@/lib/validate';
 import { downloadCsv, ordersToCsv } from '@/lib/csv';
 
 const STATUS_STYLE = {
-  Pending: 'bg-yellow-500/15 text-yellow-300',
-  Verified: 'bg-blue-500/15 text-blue-300',
-  Dispatched: 'bg-green-500/15 text-green-300',
-  Cancelled: 'bg-red-500/15 text-red-300',
+  Pending: 'bg-yellow-500/15 text-yellow-800',
+  Verified: 'bg-blue-500/15 text-blue-800',
+  Dispatched: 'bg-green-500/15 text-green-800',
+  Cancelled: 'bg-red-500/15 text-red-700',
 };
 
 function waMessage(o) {
@@ -44,11 +44,19 @@ export default function AdminOrders() {
     return c;
   }, [orders]);
 
+  const stats = useMemo(() => {
+    const list = orders || [];
+    const live = list.filter((o) => o.status !== 'Cancelled');
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const sales = live.reduce((t, o) => t + (Number(o.total) || 0), 0);
+    return { today: list.filter((o) => (o.createdAtMs || 0) >= start.getTime()).length, pending: list.filter((o) => o.status === 'Pending').length, sales, avg: live.length ? Math.round(sales / live.length) : 0 };
+  }, [orders]);
+
   const setStatus = (id, status) => updateDoc(doc(dbClient(), 'orders', id), { status, [`${status.toLowerCase()}At`]: Date.now() }).catch((e) => alert(e.message));
   const setTracking = (id, trackingId) => updateDoc(doc(dbClient(), 'orders', id), { trackingId }).catch((e) => alert(e.message));
   const exportCsv = () => downloadCsv(`mizanora-orders-${filter.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`, ordersToCsv(shown));
 
-  if (error) return <p className="card text-red-300">Could not load orders: {error}. Check your Firestore rules and that you are signed in as the admin.</p>;
+  if (error) return <p className="card text-red-700">Could not load orders: {error}. Check your Firestore rules and that you are signed in as the admin.</p>;
   if (!orders) return <p className="text-dim">Loading orders...</p>;
 
   return (
@@ -56,6 +64,12 @@ export default function AdminOrders() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-4xl font-bold">Orders <span className="text-lg text-faint">live</span></h1>
         <button onClick={exportCsv} disabled={!shown.length} className="btn-gold !py-2.5"><FileDown size={18} /> Export {shown.length} to CSV</button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        {[['Orders today', stats.today], ['Pending now', stats.pending], ['Sales (not cancelled)', formatPKR(stats.sales)], ['Avg. order', formatPKR(stats.avg)]].map(([l, v]) => (
+          <div key={l} className="card !p-3"><p className="text-xs text-faint">{l}</p><p className="text-xl font-extrabold text-gold">{v}</p></div>
+        ))}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2" role="tablist">

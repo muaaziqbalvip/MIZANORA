@@ -66,11 +66,11 @@ export default function AdminBanners() {
                 <img src={b.image} alt="" className="aspect-[16/6] w-full rounded-xl bg-raised object-cover" />
                 <div className="mt-2 flex items-center gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-semibold">{b.title || '(no title)'} {b.active === false && <span className="text-xs text-red-300">(hidden)</span>}</p>
+                    <p className="truncate font-semibold">{b.title || '(no title)'} {b.active === false && <span className="text-xs text-red-700">(hidden)</span>}</p>
                     <p className="truncate text-sm text-dim">Order {b.order} · links to {b.link}</p>
                   </div>
                   <button className="btn-ghost !px-4 !py-2 text-sm" onClick={() => { setForm({ ...EMPTY, ...b }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Edit</button>
-                  <button className="px-2 text-sm text-red-300" onClick={() => remove(b)}>Delete</button>
+                  <button className="px-2 text-sm text-red-700" onClick={() => remove(b)}>Delete</button>
                 </div>
               </li>
             ))}

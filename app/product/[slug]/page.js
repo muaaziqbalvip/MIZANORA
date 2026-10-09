@@ -9,6 +9,14 @@ import Gallery from '@/components/Gallery';
 import ProductActions from '@/components/ProductActions';
 import ProductCard from '@/components/ProductCard';
 import TrackView from '@/components/TrackView';
+import VideoEmbed from '@/components/VideoEmbed';
+import ShareButtons from '@/components/ShareButtons';
+import WishButton from '@/components/WishButton';
+import { parseVideos } from '@/lib/video';
+import { getReviews } from '@/lib/reviews';
+import Stars from '@/components/Stars';
+import ReviewForm from '@/components/ReviewForm';
+import RecentlyViewed from '@/components/RecentlyViewed';
 import JsonLd from '@/components/JsonLd';
 
 export const revalidate = 60;
@@ -30,6 +38,11 @@ export async function generateMetadata({ params }) {
     path: `/product/${p.slug}`,
     image: p.images[0] || '/img/hero-banner.jpg',
     type: 'website',
+    other: {
+      'product:price:amount': String(p.price), 'product:price:currency': 'PKR',
+      'product:availability': p.inStock ? 'in stock' : 'out of stock', 'product:condition': 'new',
+      'product:retailer_item_id': p.slug, ...(p.category ? { 'product:category': p.category } : {}),
+    },
   });
 }
 
@@ -43,6 +56,9 @@ export default async function ProductPage({ params }) {
   const related = [...sameCat, ...all.filter((x) => x.slug !== p.slug && !sameCat.includes(x))].slice(0, 4);
   const off = discountPct(p.price, p.comparePrice);
   const url = absUrl(`/product/${p.slug}`);
+  const videos = parseVideos(p.videos);
+  const reviews = await getReviews(p.id);
+  const avg = reviews.length ? reviews.reduce((t, r) => t + r.rating, 0) / reviews.length : 0;
 
   const productLd = {
     '@context': 'https://schema.org',
@@ -54,6 +70,8 @@ export default async function ProductPage({ params }) {
     sku: p.slug,
     category: p.category || undefined,
     brand: { '@type': 'Brand', name: SITE.name },
+    ...(reviews.length ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: avg.toFixed(1), reviewCount: reviews.length }, review: reviews.slice(0, 10).map((r) => ({ '@type': 'Review', author: { '@type': 'Person', name: r.name }, reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 }, reviewBody: r.text })) } : {}),
+    ...(videos.some((v) => v.type === 'youtube') ? { subjectOf: videos.filter((v) => v.type === 'youtube').map((v) => ({ '@type': 'VideoObject', name: `${p.name} video`, description: p.description || p.name, thumbnailUrl: v.thumb, uploadDate: new Date(p.updatedAt || p.createdAt || Date.now()).toISOString(), embedUrl: `https://www.youtube.com/embed/${v.id}`, contentUrl: v.url })) } : {}),
     offers: {
       '@type': 'Offer',
       url,
@@ -81,7 +99,7 @@ export default async function ProductPage({ params }) {
         <div className="grid gap-8 lg:grid-cols-2">
           <Gallery images={p.images} name={p.name} />
           <div>
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl">{p.name}</h1>
+            <div className="flex items-start justify-between gap-3"><h1 className="text-2xl font-extrabold leading-tight sm:text-4xl">{p.name}</h1><WishButton product={p} className="shrink-0" /></div>
             <p className="mt-4 flex flex-wrap items-baseline gap-3">
               <span className="text-3xl font-bold text-gold">{formatPKR(p.price)}</span>
               {p.comparePrice > p.price && <span className="text-lg text-faint line-through">{formatPKR(p.comparePrice)}</span>}
@@ -89,6 +107,7 @@ export default async function ProductPage({ params }) {
             </p>
             <p className="mt-1 text-sm text-dim">{SITE.shippingFee > 0 ? `Delivery ${formatPKR(SITE.shippingFee)}` : 'Free delivery'} · Cash on delivery</p>
             <ProductActions product={p} />
+            <ShareButtons url={url} title={p.name} />
             <ul className="mt-6 grid gap-2.5 rounded-2xl border border-line bg-surface p-4 text-sm text-dim">
               <li className="flex items-center gap-2.5"><Banknote size={18} className="text-gold" /> Pay cash when the parcel arrives</li>
               <li className="flex items-center gap-2.5"><Truck size={18} className="text-gold" /> Delivery across Pakistan</li>
@@ -97,6 +116,26 @@ export default async function ProductPage({ params }) {
             </ul>
           </div>
         </div>
+
+        <section className="mt-12" aria-labelledby="rev">
+          <h2 id="rev" className="section-title mb-3">Customer reviews</h2>
+          {reviews.length > 0 ? (
+            <div className="mb-4 flex items-center gap-3"><span className="text-4xl font-extrabold">{avg.toFixed(1)}</span><div><Stars value={avg} size={20} /><p className="text-sm text-dim">{reviews.length} review{reviews.length > 1 ? 's' : ''}</p></div></div>
+          ) : <p className="mb-4 text-dim">No reviews yet. Be the first to review this product.</p>}
+          <ul className="mb-5 space-y-3">
+            {reviews.map((r) => <li key={r.id} className="card !p-4"><div className="flex items-center justify-between gap-2"><b>{r.name}</b><Stars value={r.rating} /></div><p className="mt-1 text-sm text-dim">{r.text}</p></li>)}
+          </ul>
+          <ReviewForm productId={p.id} productName={p.name} />
+        </section>
+
+        <RecentlyViewed current={p.id} />
+
+        {videos.length > 0 && (
+          <section className="mt-10" aria-labelledby="vid">
+            <h2 id="vid" className="section-title mb-3">Watch the video</h2>
+            <VideoEmbed videos={videos} title={p.name} />
+          </section>
+        )}
 
         {p.description && (
           <section className="mt-10 max-w-3xl" aria-labelledby="desc">

@@ -5,8 +5,9 @@ import { dbClient, authClient } from '@/lib/firebase-client';
 import { formatPKR, slugify } from '@/lib/format';
 import ImageUploader from '@/components/ImageUploader';
 import { DEPARTMENTS } from '@/lib/departments';
+import { parseVideo } from '@/lib/video';
 
-const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', sizes: '', inStock: true, featured: false, active: true };
+const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', videos: '', sizes: '', inStock: true, featured: false, active: true };
 const SAMPLE = {
   name: 'Tactical Boots', slug: 'tactical-boots', price: 3500, comparePrice: 0, category: 'Footwear',
   description: 'Lace-up, side-zip tactical boots in sand colour for work, hiking and everyday wear.\n\nEdit this text, the price and the photos in the admin panel.',
@@ -51,7 +52,7 @@ export default function AdminProducts() {
       const toArr = (v) => (Array.isArray(v) ? v : String(v || '').split(/[\n,]/)).map((x) => String(x).trim()).filter(Boolean);
       await setDoc(doc(dbClient(), 'products', slug), {
         name: data.name.trim(), price, comparePrice: Number(data.comparePrice) || 0, category: (data.category || '').trim(),
-        description: (data.description || '').trim(), images: toArr(data.images), sizes: toArr(data.sizes),
+        description: (data.description || '').trim(), images: toArr(data.images), videos: toArr(data.videos), sizes: toArr(data.sizes),
         inStock: Boolean(data.inStock), featured: Boolean(data.featured), active: Boolean(data.active),
         createdAt: existing ? existing.createdAt || now : now, updatedAt: now,
       });
@@ -65,7 +66,7 @@ export default function AdminProducts() {
 
   const edit = (p) => {
     setEditing(true);
-    setForm({ ...EMPTY, ...p, slug: p.id, price: p.price, comparePrice: p.comparePrice || '', images: (p.images || []).join('\n'), sizes: (p.sizes || []).join(', ') });
+    setForm({ ...EMPTY, ...p, slug: p.id, price: p.price, comparePrice: p.comparePrice || '', images: (p.images || []).join('\n'), videos: (p.videos || []).join('\n'), sizes: (p.sizes || []).join(', ') });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   async function remove(p) {
@@ -88,11 +89,11 @@ export default function AdminProducts() {
             {list.map((p) => (
               <li key={p.id} className="card flex items-center gap-3 !p-3">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{p.name} {p.active === false && <span className="text-xs text-red-300">(hidden)</span>}</p>
+                  <p className="truncate font-semibold">{p.name} {p.active === false && <span className="text-xs text-red-700">(hidden)</span>}</p>
                   <p className="text-sm text-dim">{formatPKR(p.price)} · {p.inStock === false ? 'Sold out' : 'In stock'}{p.featured ? ' · Featured' : ''}</p>
                 </div>
                 <button className="btn-ghost !px-4 !py-2 text-sm" onClick={() => edit(p)}>Edit</button>
-                <button className="px-2 text-sm text-red-300" onClick={() => remove(p)}>Delete</button>
+                <button className="px-2 text-sm text-red-700" onClick={() => remove(p)}>Delete</button>
               </li>
             ))}
           </ul>
@@ -125,6 +126,13 @@ export default function AdminProducts() {
             </div>
           )}
           <textarea id="pi" rows={2} className="input mt-2" value={form.images} onChange={set('images')} placeholder="Or paste image links here, one per line" />
+        </div>
+        <div>
+          <label className="label" htmlFor="pv">Video links (optional, one per line)</label>
+          <textarea id="pv" rows={2} className="input" value={form.videos} onChange={set('videos')} placeholder="YouTube, Facebook, Instagram reel, TikTok or .mp4 link" />
+          {String(form.videos || '').split('\n').map((x) => x.trim()).filter(Boolean).map((u) => (
+            <p key={u} className={`mt-1 truncate text-xs ${parseVideo(u) ? 'text-gold' : 'text-red-600'}`}>{parseVideo(u) ? `OK: ${parseVideo(u).label}` : 'Not supported'} - {u}</p>
+          ))}
         </div>
         <div><label className="label" htmlFor="pz">Sizes (comma separated, optional)</label><input id="pz" className="input" value={form.sizes} onChange={set('sizes')} placeholder="40, 41, 42, 43" /></div>
         <div className="flex flex-wrap gap-4 text-sm">

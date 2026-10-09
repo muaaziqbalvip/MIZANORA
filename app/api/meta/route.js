@@ -5,7 +5,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Browser events that are mirrored to the Conversions API. Purchase is sent only by /api/orders (server truth).
-const ALLOWED = new Set(['ViewContent', 'AddToCart', 'InitiateCheckout']);
+const ALLOWED = new Set(['ViewContent', 'AddToCart', 'InitiateCheckout', 'AddToWishlist', 'Search', 'CompleteRegistration', 'Contact']);
 
 export async function POST(req) {
   let b;

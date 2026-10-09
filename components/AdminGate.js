@@ -116,11 +116,11 @@ export default function AdminGate({ children }) {
       <div className="mx-auto max-w-sm px-4 py-16">
         <h1 className="mb-6 text-center text-4xl font-bold">Admin login</h1>
         {user && !allowed && (
-          <div className="mb-3 rounded-xl bg-red-500/10 p-3 text-sm text-red-300">
+          <div className="mb-3 rounded-xl bg-red-500/10 p-3 text-sm text-red-700">
             <p>This account is not the store admin.</p>
             <p className="mt-1 break-all">Signed in as: <b>{user.email || 'unknown'}</b></p>
-            <p className="mt-1 break-all text-xs text-red-200/80">Your UID: {user.uid}<br />Firestore rules only allow the UID or the verified email you pasted in the rules. Add this account there and click Publish.</p>
-            <button type="button" onClick={() => signOut(authClient())} className="mt-2 rounded-full border border-red-300/60 px-4 py-1.5 font-semibold">Sign out and try again</button>
+            <p className="mt-1 break-all text-xs text-red-700/80">Your UID: {user.uid}<br />Firestore rules only allow the UID or the verified email you pasted in the rules. Add this account there and click Publish.</p>
+            <button type="button" onClick={() => signOut(authClient())} className="mt-2 rounded-full border border-red-400 px-4 py-1.5 font-semibold">Sign out and try again</button>
           </div>
         )}
         <div className="card space-y-4">
@@ -143,7 +143,7 @@ export default function AdminGate({ children }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">{tab('/admin/orders', 'Orders')}{tab('/admin/products', 'Products')}{tab('/admin/banners', 'Banners')}</div>
+        <div className="flex flex-wrap gap-2">{tab('/admin/orders', 'Orders')}{tab('/admin/products', 'Products')}{tab('/admin/banners', 'Banners')}{tab('/admin/coupons', 'Coupons')}{tab('/admin/reviews', 'Reviews')}</div>
         <button onClick={() => signOut(authClient())} className="flex items-center gap-2 text-sm text-dim hover:text-gold"><LogOut size={16} /> Sign out</button>
       </div>
       <SetupCheck />

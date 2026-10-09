@@ -4,6 +4,7 @@ import { SITE } from '@/lib/config';
 import { getCategories } from '@/lib/products';
 import { orgJsonLd, websiteJsonLd } from '@/lib/seo';
 import { CartProvider } from '@/components/CartProvider';
+import { AuthProvider } from '@/components/AuthProvider';
 import { InstallProvider } from '@/components/InstallProvider';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import Header from '@/components/Header';
@@ -33,7 +34,11 @@ export const metadata = {
   keywords: ['Mizanora', 'online shopping Pakistan', 'online market Pakistan', 'cash on delivery Pakistan', 'buy online Pakistan', 'halal shopping', 'shopping blog Pakistan'],
   authors: [{ name: 'Mizanora' }],
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
-  verification: process.env.NEXT_PUBLIC_GSC_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION } : undefined,
+  verification: {
+    ...(process.env.NEXT_PUBLIC_GSC_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION } : {}),
+    // Meta Business Suite > Brand safety > Domains: paste the verification code here to verify your domain.
+    ...(process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFICATION ? { other: { 'facebook-domain-verification': process.env.NEXT_PUBLIC_FB_DOMAIN_VERIFICATION } } : {}),
+  },
   appleWebApp: { capable: true, title: 'Mizanora', statusBarStyle: 'default' },
   formatDetection: { telephone: false },
 };
@@ -43,6 +48,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en-PK" className={`${display.variable} ${body.variable}`}>
       <body>
+        <AuthProvider>
         <CartProvider>
           <InstallProvider>
             <AnnouncementBar />
@@ -54,6 +60,7 @@ export default async function RootLayout({ children }) {
             <InstallBanner />
           </InstallProvider>
         </CartProvider>
+        </AuthProvider>
         <MetaPixel />
         <PwaRegister />
         <JsonLd data={[orgJsonLd(), websiteJsonLd()]} />

@@ -5,6 +5,9 @@ import { adminDb, adminReady } from '@/lib/firebase-admin';
 import { validateCustomer, normalizePhone } from '@/lib/validate';
 import { SITE } from '@/lib/config';
 import { sendCapi } from '@/lib/capi';
+import { priceCoupon } from '@/lib/coupons';
+import { getAuth } from 'firebase-admin/auth';
+import { adminApp } from '@/lib/firebase-admin';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -63,11 +66,24 @@ export async function POST(req) {
     }
     const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
     const shipping = SITE.shippingFee;
-    const total = subtotal + shipping;
+
+    // Optional: a signed-in customer's order is linked to their account so it shows in their order history.
+    let uid = '', email = '';
+    const tok = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
+    if (tok) { try { const d = await getAuth(adminApp()).verifyIdToken(tok); uid = d.uid; email = String(d.email || '').toLowerCase(); } catch { /* guest order */ } }
+
+    // Optional coupon, re-checked here with real prices.
+    let discount = 0, couponCode = '';
+    if (body.coupon) {
+      const r = await priceCoupon(db, body.coupon, subtotal);
+      if (!r.ok) return fail(r.error);
+      discount = r.discount; couponCode = r.code;
+    }
+    const total = subtotal - discount + shipping;
 
     const now = Date.now();
     const base = {
-      status: 'Pending', customer: clean, items, subtotal, shipping, total, paymentMethod: 'COD',
+      status: 'Pending', customer: clean, items, subtotal, discount, couponCode, shipping, total, paymentMethod: 'COD', uid, email,
       createdAt: FieldValue.serverTimestamp(), createdAtMs: now, trackingId: '',
     };
 
@@ -77,6 +93,8 @@ export async function POST(req) {
       try { await db.collection('orders').doc(id).create({ orderId: id, ...base }); orderId = id; }
       catch (e) { if (attempt === 3) throw e; } // ID collision is extremely unlikely; retry
     }
+
+    if (couponCode) { try { await db.collection('coupons').doc(couponCode).update({ used: FieldValue.increment(1) }); } catch (_) { /* counting is best effort */ } }
 
     // Server-side Purchase (Conversions API). Same eventID as the browser Purchase so Meta counts it once.
     const phone = normalizePhone(clean.phone);
@@ -88,12 +106,12 @@ export async function POST(req) {
         num_items: items.reduce((s, i) => s + i.qty, 0),
       },
       ip, userAgent: req.headers.get('user-agent') || '', fbp: body.fbp, fbc: body.fbc,
-      phoneWa: phone ? phone.wa : '', fullName: clean.name, city: clean.city,
+      phoneWa: phone ? phone.wa : '', fullName: clean.name, city: clean.city, email, uid,
     }));
 
     return NextResponse.json({
       ok: true,
-      order: { orderId, createdAtMs: now, status: 'Pending', customer: clean, items, subtotal, shipping, total },
+      order: { orderId, createdAtMs: now, status: 'Pending', customer: clean, items, subtotal, discount, couponCode, shipping, total },
     });
   } catch (e) {
     console.error('order failed', e);

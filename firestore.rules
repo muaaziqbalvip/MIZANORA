@@ -5,6 +5,7 @@ service cloud.firestore {
     // The admin can be recognised two ways (either one is enough):
     //  1) the admin's UID (email + password login)  -> Firebase Console > Authentication > Users > "User UID"
     //  2) a Google account whose email is verified   -> put the admin email(s) in the list below
+    // IMPORTANT: keep YOUR admin UID / email here when you publish. Do not publish the PASTE_... placeholders.
     function isAdmin() {
       return request.auth != null && (
         request.auth.uid == 'PASTE_ADMIN_UID_HERE' ||
@@ -17,10 +18,32 @@ service cloud.firestore {
     match /banners/{id}  { allow read: if true; allow write: if isAdmin(); }
 
     // Orders are created ONLY by the server (/api/orders uses the Admin SDK, which bypasses these rules).
-    // Browsers can never create, read or edit orders. Only the admin can read and update them.
+    // A signed-in customer can read ONLY their own orders (orders carry the customer's uid). The admin reads all.
     match /orders/{id} {
-      allow read, update: if isAdmin();
+      allow read: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin();
       allow create, delete: if false;
+    }
+
+    // Each customer's own profile and saved addresses.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Discount coupons: admin only (the server checks them when an order is placed).
+    match /coupons/{id} { allow read, write: if isAdmin(); }
+
+    // Customer reviews. A signed-in customer can write ONE review per product (id = uid_productId), always "pending".
+    // Only approved reviews are public. The admin approves or deletes them in /admin/reviews.
+    match /reviews/{id} {
+      allow read: if resource.data.approved == true || isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.productId
+        && request.resource.data.approved == false
+        && request.resource.data.rating is int && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+        && request.resource.data.text is string && request.resource.data.text.size() <= 600;
+      allow update, delete: if isAdmin();
     }
 
     match /{document=**} { allow read, write: if false; }

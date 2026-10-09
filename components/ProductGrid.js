@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import ProductCard from './ProductCard';
+import { search as trackSearch } from '@/lib/metaPixel';
 
 // Search + sort run in the browser, so /products stays a fast, fully static (SEO-friendly) page.
 export default function ProductGrid({ products }) {
@@ -10,6 +11,7 @@ export default function ProductGrid({ products }) {
   const [q, setQ] = useState(sp.get('q') || '');
   useEffect(() => { setQ(sp.get('q') || ''); }, [sp]);
   const [sort, setSort] = useState('new');
+  useEffect(() => { const t = q.trim(); if (t.length < 3) return undefined; const h = setTimeout(() => trackSearch(t), 1200); return () => clearTimeout(h); }, [q]);
   const list = useMemo(() => {
     const t = q.trim().toLowerCase();
     let r = products.filter((p) => !t || `${p.name} ${p.category}`.toLowerCase().includes(t));

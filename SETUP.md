@@ -10,7 +10,7 @@
 2. **Firestore Database** > Create database > Production mode > pick a region (asia-south1 Mumbai is closest to Pakistan).
 3. **Authentication** > Get started > Sign-in method > enable **Email/Password** AND **Google** (choose a support email, Save).
 4. Authentication > Users > **Add user**: your admin email + a strong password (for the email login). Copy the **User UID**. If you only want Google login you can skip this user.
-5. Authentication > Settings > User actions > **turn OFF "Enable create (sign-up)"** so nobody else can register.
+5. Authentication > Settings > User actions > keep **"Enable create (sign-up)" ON**. Customers now create accounts. Admin power comes ONLY from your UID/email in firestore.rules, so customers can never see admin pages or other people's orders.
 6. Firestore > Rules: paste the contents of `firestore.rules`, replace `PASTE_ADMIN_UID_HERE` with your UID and `PASTE_ADMIN_EMAIL_HERE@gmail.com` with your Google admin email, click **Publish**. (Google login works through the email line, email login works through the UID line.)
 6b. Authentication > Settings > **Authorized domains** > Add `mizanora.vercel.app` (and later `mizanora.store`). Google login fails without this.
 7. Project settings (gear) > General > Your apps > Web (`</>`) > register app > copy `apiKey`, `authDomain`, `projectId`, `appId`.
@@ -91,3 +91,23 @@
 - **Meta:** Graph API default is now v26.0 (current). Meta product catalog feed: in Commerce Manager > Catalog > Data sources > Data feed, use `https://YOUR-DOMAIN/api/feed` with a daily schedule. Feed ids equal the product slug, the same ids the Pixel sends, so catalog ads match.
 - **Blog:** add a new post any time by adding a `.md` file in `content/blog/` (copy any existing file for the format) and commit it.
 - **Departments:** the home page shows starter departments (Footwear, Men Fashion, Mobile Accessories, ...). Use the same name in a product's Category field and it becomes a real category with its own shelf.
+
+## 10. NEW: customer accounts, bills, coupons, reviews, videos (do these steps)
+1. **Publish the new Firestore rules (important).** Open `firestore.rules`, put YOUR admin UID and Google email where it says PASTE_ADMIN_UID_HERE / PASTE_ADMIN_EMAIL_HERE, then Firebase Console > Firestore > Rules > paste > Publish. Without this, saved addresses, order history, coupons and reviews will show a "rules" message.
+2. **Turn on Email/Password and Google** in Authentication and add your domain under Authorized domains.
+3. Redeploy on Vercel.
+
+What customers get:
+- **Account** (`/account`): sign in with Google or email, saved addresses (Home/Work/Other + default), order history with full bills, order again, wishlist link. Guests can still order without an account.
+- **Order confirmation + bill:** after ordering, a full bill (items, quantity, line totals, coupon discount, delivery, total to pay), print / save as PDF, and progress (Order placed > Confirmed > On the way).
+- **Track order** (`/track`): order ID + phone number, no account needed.
+- **Wishlist** (heart on cards and product pages), **recently viewed**, **search suggestions** that forgive spelling mistakes.
+- **Share and copy product link** on every product page, and a share button on every product card.
+- **Reviews:** signed-in customers can review a product. Reviews are hidden until you approve them in `/admin/reviews`. Approved reviews add star ratings for Google.
+
+What you get in /admin:
+- **Coupons** (`/admin/coupons`): percent or flat, minimum order, maximum discount, expiry, use limit.
+- **Reviews** approval, and **sales stats** (orders today, pending, sales, average order) at the top of Orders.
+- **Videos:** in a product, paste YouTube / Facebook / Instagram reel / TikTok / .mp4 links (one per line). They play on the product page and appear in "Watch and shop" on the home page.
+
+Meta extras: events Search, AddToWishlist, CompleteRegistration and Contact are sent (browser + server). Logged-in customers improve match quality. Optional env `NEXT_PUBLIC_FB_DOMAIN_VERIFICATION` adds the Meta domain-verification tag. Product pages carry Facebook product tags (price, availability).

@@ -21,7 +21,7 @@
   .input { @apply w-full rounded-xl border border-line bg-raised px-4 py-3 text-base text-cream placeholder:text-faint focus:border-gold focus:outline-none; }
   .input-err { @apply border-red-500; }
   .label { @apply mb-1.5 block text-sm font-medium text-cream; }
-  .field-err { @apply mt-1.5 text-sm text-red-400; }
+  .field-err { @apply mt-1.5 text-sm text-red-600; }
   .card { @apply rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(18,32,26,.05)]; }
   .section-title { @apply font-display text-2xl font-extrabold sm:text-3xl; }
 }
@@ -47,3 +47,10 @@
 }
 .no-sb { scrollbar-width: none; }
 .no-sb::-webkit-scrollbar { display: none; }
+
+@media print {
+  body > *:not(main) { display: none !important; }
+  .no-print { display: none !important; }
+  body { background: #fff !important; }
+  main > *:not(.print-ok) { }
+}
