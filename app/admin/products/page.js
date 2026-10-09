@@ -6,18 +6,20 @@ import { formatPKR, slugify } from '@/lib/format';
 import ImageUploader from '@/components/ImageUploader';
 import { DEPARTMENTS } from '@/lib/departments';
 import { parseVideo } from '@/lib/video';
+import { optionsOf, optionsToText, templateFor, textToOptions, textToSpecs } from '@/lib/options';
 
-const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', videos: '', sizes: '', inStock: true, featured: false, active: true };
+const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', videos: '', options: '', specs: '', inStock: true, featured: false, active: true };
 const SAMPLE = {
   name: 'Tactical Boots', slug: 'tactical-boots', price: 3500, comparePrice: 0, category: 'Footwear',
   description: 'Lace-up, side-zip tactical boots in sand colour for work, hiking and everyday wear.\n\nEdit this text, the price and the photos in the admin panel.',
-  images: [], sizes: ['40', '41', '42', '43', '44', '45'], inStock: true, featured: true, active: true,
+  images: [], options: 'Size: 40, 41, 42, 43, 44, 45', specs: '', inStock: true, featured: true, active: true,
 };
 
 export default function AdminProducts() {
   const [list, setList] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [editing, setEditing] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -52,13 +54,13 @@ export default function AdminProducts() {
       const toArr = (v) => (Array.isArray(v) ? v : String(v || '').split(/[\n,]/)).map((x) => String(x).trim()).filter(Boolean);
       await setDoc(doc(dbClient(), 'products', slug), {
         name: data.name.trim(), price, comparePrice: Number(data.comparePrice) || 0, category: (data.category || '').trim(),
-        description: (data.description || '').trim(), images: toArr(data.images), videos: toArr(data.videos), sizes: toArr(data.sizes),
+        description: (data.description || '').trim(), images: toArr(data.images), videos: toArr(data.videos), options: textToOptions(data.options), sizes: [], specs: textToSpecs(data.specs),
         inStock: Boolean(data.inStock), featured: Boolean(data.featured), active: Boolean(data.active),
         createdAt: existing ? existing.createdAt || now : now, updatedAt: now,
       });
       await revalidate(slug);
       setMsg(`Saved "${data.name}". It appears on the shop within a minute.`);
-      setForm(EMPTY); setEditing(false);
+      setForm(EMPTY); setEditing(false); setShowForm(false);
       await load();
     } catch (e) { setMsg(e && e.code === 'permission-denied' ? 'Permission denied: your account is not the admin in Firestore rules. Paste your UID/email in firestore.rules and click Publish.' : (e && e.message) || 'Could not save.'); }
     setBusy(false);
@@ -66,7 +68,8 @@ export default function AdminProducts() {
 
   const edit = (p) => {
     setEditing(true);
-    setForm({ ...EMPTY, ...p, slug: p.id, price: p.price, comparePrice: p.comparePrice || '', images: (p.images || []).join('\n'), videos: (p.videos || []).join('\n'), sizes: (p.sizes || []).join(', ') });
+    setForm({ ...EMPTY, ...p, slug: p.id, price: p.price, comparePrice: p.comparePrice || '', images: (p.images || []).join('\n'), videos: (p.videos || []).join('\n'), options: optionsToText(optionsOf(p)), specs: (p.specs || []).join('\n') });
+    setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   async function remove(p) {
@@ -75,9 +78,12 @@ export default function AdminProducts() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_24rem]">
-      <section>
-        <h1 className="mb-4 text-4xl font-bold">Products</h1>
+    <div className="grid min-w-0 gap-8 lg:grid-cols-[1fr_24rem]">
+      <section className={`min-w-0 ${showForm ? 'hidden lg:block' : ''}`}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h1 className="text-3xl font-extrabold sm:text-4xl">Products</h1>
+          <button type="button" className="btn-gold !px-5 !py-2.5 lg:hidden" onClick={() => { setForm(EMPTY); setEditing(false); setShowForm(true); window.scrollTo({ top: 0 }); }}>+ Add product</button>
+        </div>
         {msg && <p role="status" className="mb-3 rounded-xl bg-raised p-3 text-sm text-cream">{msg}</p>}
         {!list ? <p className="text-dim">Loading...</p> : list.length === 0 ? (
           <div className="card text-center">
@@ -100,8 +106,9 @@ export default function AdminProducts() {
         )}
       </section>
 
-      <form className="card h-fit space-y-3 lg:sticky lg:top-24" onSubmit={(e) => { e.preventDefault(); save(form, !editing); }}>
-        <h2 className="text-2xl font-semibold">{editing ? 'Edit product' : 'Add product'}</h2>
+      <form className={`card h-fit min-w-0 space-y-3 lg:sticky lg:top-24 ${showForm ? '' : 'hidden lg:block'}`} onSubmit={(e) => { e.preventDefault(); save(form, !editing); }}>
+        <button type="button" className="text-sm font-bold text-gold lg:hidden" onClick={() => { setForm(EMPTY); setEditing(false); setShowForm(false); }}>&larr; Back to products</button>
+        <h2 className="text-2xl font-extrabold">{editing ? 'Edit product' : 'Add product'}</h2>
         <div><label className="label" htmlFor="pn">Name</label><input id="pn" className="input" value={form.name} onChange={set('name')} required /></div>
         <div><label className="label" htmlFor="ps">URL slug</label><input id="ps" className="input" value={form.slug} onChange={set('slug')} disabled={editing} /></div>
         <div className="grid grid-cols-2 gap-3">
@@ -134,14 +141,35 @@ export default function AdminProducts() {
             <p key={u} className={`mt-1 truncate text-xs ${parseVideo(u) ? 'text-gold' : 'text-red-600'}`}>{parseVideo(u) ? `OK: ${parseVideo(u).label}` : 'Not supported'} - {u}</p>
           ))}
         </div>
-        <div><label className="label" htmlFor="pz">Sizes (comma separated, optional)</label><input id="pz" className="input" value={form.sizes} onChange={set('sizes')} placeholder="40, 41, 42, 43" /></div>
+        {(() => {
+          const t = templateFor(form.category);
+          const parsed = textToOptions(form.options);
+          const addLine = (key, line) => setForm((f) => ({ ...f, [key]: [String(f[key] || '').trim(), line].filter(Boolean).join('\n') }));
+          return (
+            <>
+              <div>
+                <label className="label" htmlFor="po">Options shoppers choose (colour, size, storage ...)</label>
+                <p className="mb-1.5 text-xs text-faint">One option per line, like <b>Color: Red, Blue, Black</b>. Tap a suggestion for this category:</p>
+                <div className="mb-2 flex flex-wrap gap-1.5">{t.options.map((o) => <button key={o} type="button" onClick={() => addLine('options', o)} className="rounded-full bg-raised px-3 py-1.5 text-xs font-semibold text-dim hover:text-gold">+ {o.split(':')[0]}</button>)}</div>
+                <textarea id="po" rows={3} className="input" value={form.options} onChange={set('options')} placeholder={'Color: Red, Blue, Black\nSize: S, M, L'} />
+                {parsed.map((o) => <p key={o.name} className="mt-1 text-xs text-gold">{o.name}: {o.values.length} choice{o.values.length > 1 ? 's' : ''}</p>)}
+              </div>
+              <div>
+                <label className="label" htmlFor="pq">Product details (material, brand, warranty ...)</label>
+                <p className="mb-1.5 text-xs text-faint">One per line, like <b>Material: Katan silk</b>. Tap to add a line:</p>
+                <div className="mb-2 flex flex-wrap gap-1.5">{t.specs.map((k) => <button key={k} type="button" onClick={() => addLine('specs', `${k}: `)} className="rounded-full bg-raised px-3 py-1.5 text-xs font-semibold text-dim hover:text-gold">+ {k}</button>)}</div>
+                <textarea id="pq" rows={3} className="input" value={form.specs} onChange={set('specs')} placeholder={'Fabric: Katan silk\nPieces: 3'} />
+              </div>
+            </>
+          );
+        })()}
         <div className="flex flex-wrap gap-4 text-sm">
           {[['inStock', 'In stock'], ['featured', 'Featured on home'], ['active', 'Visible']].map(([k, l]) => (
             <label key={k} className="flex items-center gap-2"><input type="checkbox" checked={Boolean(form[k])} onChange={set(k)} className="h-4 w-4 accent-[#0B6B45]" /> {l}</label>
           ))}
         </div>
         <button className="btn-gold w-full" disabled={busy}>{busy ? 'Saving...' : 'Save product'}</button>
-        {editing && <button type="button" className="btn-ghost w-full" onClick={() => { setForm(EMPTY); setEditing(false); }}>Cancel edit</button>}
+        {editing && <button type="button" className="btn-ghost w-full" onClick={() => { setForm(EMPTY); setEditing(false); setShowForm(false); }}>Cancel</button>}
       </form>
     </div>
   );

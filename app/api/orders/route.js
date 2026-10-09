@@ -6,6 +6,7 @@ import { validateCustomer, normalizePhone } from '@/lib/validate';
 import { SITE } from '@/lib/config';
 import { sendCapi } from '@/lib/capi';
 import { priceCoupon } from '@/lib/coupons';
+import { optionsOf, validVariant } from '@/lib/options';
 import { getAuth } from 'firebase-admin/auth';
 import { adminApp } from '@/lib/firebase-admin';
 
@@ -59,9 +60,8 @@ export async function POST(req) {
       if (!p || p.active === false) return fail('One of the products is no longer available. Please refresh your cart.');
       if (p.inStock === false) return fail(`${p.name} is currently sold out.`);
       if (!(qty >= 1 && qty <= 10)) return fail('Invalid quantity.');
-      const sizes = Array.isArray(p.sizes) ? p.sizes : [];
       const size = String(r.size || '');
-      if (sizes.length && !sizes.includes(size)) return fail(`Please select a valid size for ${p.name}.`);
+      if (!validVariant(optionsOf(p), size)) return fail(`Please choose the options (for example colour and size) for ${p.name} again.`);
       items.push({ id: String(r.id), slug: String(r.id), name: p.name, price: Number(p.price) || 0, qty, size, image: (p.images && p.images[0]) || '' });
     }
     const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);

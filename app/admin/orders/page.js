@@ -16,7 +16,7 @@ const STATUS_STYLE = {
 };
 
 function waMessage(o) {
-  const items = o.items.map((i) => `${i.name}${i.size ? ` (size ${i.size})` : ''} x${i.qty}`).join(', ');
+  const items = o.items.map((i) => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.qty}`).join(', ');
   return `Assalam o Alaikum ${o.customer.name}, aap ne Mizanora se order ${o.orderId} kiya hai.\nItems: ${items}\nTotal (COD): ${formatPKR(o.total)}\nAddress: ${o.customer.address}, ${o.customer.city}\nKya aap order confirm karte hain? Shukriya.`;
 }
 
@@ -103,7 +103,7 @@ export default function AdminOrders() {
                 <div className="mt-4 space-y-4 border-t border-line pt-4 text-sm">
                   <div>
                     <p className="mb-1 font-semibold text-cream">Items</p>
-                    <ul className="space-y-1 text-dim">{o.items.map((i, n) => <li key={n}>{i.name}{i.size ? ` (size ${i.size})` : ''} x {i.qty} = {formatPKR(i.price * i.qty)}</li>)}</ul>
+                    <ul className="space-y-1 text-dim">{o.items.map((i, n) => <li key={n}>{i.name}{i.size ? ` (${i.size})` : ''} x {i.qty} = {formatPKR(i.price * i.qty)}</li>)}</ul>
                     <p className="mt-1 text-dim">Delivery: {o.shipping > 0 ? formatPKR(o.shipping) : 'Free'} · <b className="text-cream">COD total {formatPKR(o.total)}</b></p>
                   </div>
                   <div className="rounded-xl bg-raised p-3 text-dim">

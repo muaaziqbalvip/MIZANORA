@@ -54,3 +54,11 @@
   body { background: #fff !important; }
   main > *:not(.print-ok) { }
 }
+
+/* The page must never be wider than the phone screen (this is what made it shrink and spread sideways). */
+html, body { max-width: 100%; overflow-x: clip; }
+html { touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
+img, video, iframe, svg { max-width: 100%; }
+main, section, article, form, ul, ol, dl { min-width: 0; }
+/* 16px inputs stop the browser from zooming in when you tap a field */
+@media (max-width: 767px) { input, select, textarea { font-size: 16px !important; } }

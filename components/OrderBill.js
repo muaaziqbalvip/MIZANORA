@@ -43,7 +43,7 @@ export default function OrderBill({ order, showTimeline = true, printable = true
           <tbody>
             {order.items.map((i) => (
               <tr key={`${i.id}${i.size}`} className="border-b border-line/60">
-                <td className="py-2 pr-2">{i.name}{i.size ? <span className="text-faint"> (size {i.size})</span> : null}</td>
+                <td className="py-2 pr-2">{i.name}{i.size ? <span className="text-faint"> ({i.size})</span> : null}</td>
                 <td className="py-2 text-right">{formatPKR(i.price)}</td>
                 <td className="py-2 text-right">{i.qty}</td>
                 <td className="py-2 text-right font-semibold">{formatPKR(i.price * i.qty)}</td>

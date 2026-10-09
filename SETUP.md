@@ -111,3 +111,12 @@ What you get in /admin:
 - **Videos:** in a product, paste YouTube / Facebook / Instagram reel / TikTok / .mp4 links (one per line). They play on the product page and appear in "Watch and shop" on the home page.
 
 Meta extras: events Search, AddToWishlist, CompleteRegistration and Contact are sent (browser + server). Logged-in customers improve match quality. Optional env `NEXT_PUBLIC_FB_DOMAIN_VERIFICATION` adds the Meta domain-verification tag. Product pages carry Facebook product tags (price, availability).
+
+## 11. NEW: product options, mobile fixes, smart search
+- **Options for every category.** In Admin > Products, choose the Category and tap the suggestions: Footwear gets Size + Color, Women Fashion gets Color + Size + Fabric details, Electronics gets Color + Storage + Warranty, Beauty gets Shade + Volume, Grocery gets Weight + Pack, and so on. Write options one per line like `Color: Red, Blue, Black` and `Size: S, M, L`. Colour names show as colour dots. Shoppers must pick every option before ordering. The chosen label (for example `Baby Pink / M`) is saved on the order and the bill.
+- **Product details** (Material, Brand, Warranty, Dimensions ...): one per line like `Fabric: Katan silk`. They appear as a details table on the product page and help Google.
+- **Old products** that only had sizes keep working. They become an option called Size.
+- **Screen no longer spreads sideways, and pinch-zoom is off.** (Zoom is disabled on purpose, as requested.)
+- **Admin on phone:** the products list and the add/edit form are now separate screens with a Back button. Photo upload has a Photos button (opens the gallery picker) and a Camera button. Some phones (for example Oppo/Realme) open their Files app for the Photos button; choose Photos/Gallery on the left of that screen. Videos cannot be uploaded to ImgBB: upload to YouTube/Facebook and paste the link.
+- **Smart search** understands English, Roman Urdu and Hindi, colours and prices: `laal suit 2000 se kam`, `black joota under 5k`, `sasta watch`. It tolerates spelling mistakes. No key needed.
+- **Optional real AI search:** add `ANTHROPIC_API_KEY` in Vercel (and optionally `AI_SEARCH_MODEL`). When the normal search finds nothing, an AI model rephrases the sentence into keywords and filters. Without the key nothing breaks.

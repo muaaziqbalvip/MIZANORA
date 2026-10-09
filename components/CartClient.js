@@ -28,7 +28,7 @@ export default function CartClient() {
             </div>
             <div className="min-w-0 flex-1">
               <Link href={`/product/${i.slug}`} className="line-clamp-2 font-medium">{i.name}</Link>
-              {i.size && <p className="text-sm text-dim">Size: {i.size}</p>}
+              {i.size && <p className="text-sm text-dim">{i.size}</p>}
               <p className="mt-1 font-bold text-gold">{formatPKR(i.price)}</p>
               <div className="mt-2 flex items-center justify-between">
                 <div className="flex items-center rounded-xl border border-line">

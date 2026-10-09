@@ -235,7 +235,7 @@ export default function CheckoutClient() {
             {items.map((i) => (
               <li key={i.key} className="flex gap-3">
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-raised">{i.image && <Image src={i.image} alt="" fill sizes="56px" className="object-cover" />}</div>
-                <div className="min-w-0 flex-1 text-sm"><p className="line-clamp-2">{i.name}</p><p className="text-faint">{i.size ? `Size ${i.size} · ` : ''}Qty {i.qty}</p></div>
+                <div className="min-w-0 flex-1 text-sm"><p className="line-clamp-2">{i.name}</p><p className="text-faint">{i.size ? `${i.size} · ` : ''}Qty {i.qty}</p></div>
                 <p className="text-sm font-semibold">{formatPKR(i.price * i.qty)}</p>
               </li>
             ))}

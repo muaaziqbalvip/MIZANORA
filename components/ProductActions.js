@@ -9,26 +9,28 @@ import { waLink } from '@/lib/config';
 import { formatPKR } from '@/lib/format';
 import { WhatsAppIcon } from './Icons';
 import InstallButton from './InstallButton';
+import { colorHex, isColorOption, variantLabel } from '@/lib/options';
 
 export default function ProductActions({ product }) {
   const { add } = useCart();
   const router = useRouter();
-  const [size, setSize] = useState('');
+  const [sel, setSel] = useState({});
   const [qty, setQty] = useState(1);
   const [err, setErr] = useState('');
   const [added, setAdded] = useState(false);
-  const needSize = product.sizes.length > 0;
+  const opts = product.options || [];
 
   const ok = () => {
-    if (needSize && !size) {
-      setErr('Please select a size first');
-      document.getElementById('size-picker')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const missing = opts.find((o) => !sel[o.name]);
+    if (missing) {
+      setErr(`Please choose ${missing.name.toLowerCase()} first`);
+      document.getElementById('opt-picker')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return false;
     }
     setErr('');
     return true;
   };
-  const put = () => { add(product, { size, qty }); addToCart(product, qty); };
+  const put = () => { add(product, { size: variantLabel(opts, sel), qty }); addToCart(product, qty); };
   const buyNow = () => { if (ok()) { put(); router.push('/checkout'); } };
 
   if (!product.inStock) {
@@ -43,18 +45,27 @@ export default function ProductActions({ product }) {
 
   return (
     <div className="mt-6">
-      {needSize && (
-        <fieldset id="size-picker">
-          <legend className="mb-2 text-sm font-semibold text-cream">Select size</legend>
-          <div className="flex flex-wrap gap-2">
-            {product.sizes.map((s) => (
-              <button key={s} type="button" onClick={() => { setSize(s); setErr(''); }} aria-pressed={size === s}
-                className={`min-w-12 rounded-xl border px-3.5 py-2.5 text-sm font-semibold ${size === s ? 'border-gold bg-gold text-ink' : 'border-line bg-surface text-cream hover:border-bronze'}`}>{s}</button>
-            ))}
-          </div>
-        </fieldset>
-      )}
-      {err && <p role="alert" className="mt-2 text-sm font-medium text-red-400">{err}</p>}
+      <div id="opt-picker" className="space-y-4">
+        {opts.map((o) => (
+          <fieldset key={o.name}>
+            <legend className="mb-2 text-sm font-semibold text-cream">{o.name}{sel[o.name] ? <span className="ml-1.5 font-normal text-dim">: {sel[o.name]}</span> : null}</legend>
+            <div className="flex flex-wrap gap-2">
+              {o.values.map((v) => {
+                const on = sel[o.name] === v;
+                const hex = isColorOption(o.name) ? colorHex(v) : '';
+                return (
+                  <button key={v} type="button" onClick={() => { setSel((c) => ({ ...c, [o.name]: v })); setErr(''); }} aria-pressed={on}
+                    className={`inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl border px-3.5 py-2 text-sm font-semibold ${on ? 'border-gold bg-gold text-white' : 'border-line bg-surface text-cream hover:border-gold'}`}>
+                    {hex && <span className="h-4 w-4 shrink-0 rounded-full border border-black/20" style={{ background: hex }} aria-hidden="true" />}
+                    {v}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        ))}
+      </div>
+      {err && <p role="alert" className="mt-2 text-sm font-semibold text-red-600">{err}</p>}
 
       <div className="mt-4 flex items-center gap-3">
         <span className="text-sm font-semibold text-cream">Quantity</span>

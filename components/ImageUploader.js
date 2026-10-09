@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { ImagePlus } from 'lucide-react';
+import { Camera, ImagePlus } from 'lucide-react';
 import { authClient } from '@/lib/firebase-client';
 import { compressImage } from '@/lib/image';
 
@@ -40,12 +40,21 @@ export default function ImageUploader({ onUploaded, multiple = true, max = 1600,
     setBusy(false);
   }
 
+  const btn = `btn-ghost cursor-pointer !py-2.5 !px-4 ${busy ? 'pointer-events-none opacity-60' : ''}`;
   return (
     <div>
-      <label className={`btn-ghost cursor-pointer !py-2.5 ${busy ? 'pointer-events-none opacity-60' : ''}`}>
-        <input type="file" accept="image/*" multiple={multiple} onChange={onPick} disabled={busy} className="sr-only" />
-        <ImagePlus size={18} /> {busy ? 'Uploading...' : label}
-      </label>
+      <div className="flex flex-wrap gap-2">
+        {/* Photos: opens the phone's photo gallery picker (no capture attribute). */}
+        <label className={btn}>
+          <input type="file" accept="image/*" multiple={multiple} onChange={onPick} disabled={busy} className="sr-only" />
+          <ImagePlus size={18} /> {busy ? 'Uploading...' : label}
+        </label>
+        {/* Camera: takes a new photo straight away. */}
+        <label className={btn}>
+          <input type="file" accept="image/*" capture="environment" onChange={onPick} disabled={busy} className="sr-only" />
+          <Camera size={18} /> Camera
+        </label>
+      </div>
       {msg && <p role="status" className="mt-2 break-words text-sm text-dim">{msg}</p>}
     </div>
   );

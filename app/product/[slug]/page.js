@@ -70,6 +70,9 @@ export default async function ProductPage({ params }) {
     sku: p.slug,
     category: p.category || undefined,
     brand: { '@type': 'Brand', name: SITE.name },
+    ...(p.specs.length ? { additionalProperty: p.specs.slice(0, 20).map((x) => ({ '@type': 'PropertyValue', name: x.k, value: x.v })) } : {}),
+    ...(p.options.find((o) => /colou?r/i.test(o.name)) ? { color: p.options.find((o) => /colou?r/i.test(o.name)).values.join(', ') } : {}),
+    ...(p.options.find((o) => /size/i.test(o.name)) ? { size: p.options.find((o) => /size/i.test(o.name)).values.join(', ') } : {}),
     ...(reviews.length ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: avg.toFixed(1), reviewCount: reviews.length }, review: reviews.slice(0, 10).map((r) => ({ '@type': 'Review', author: { '@type': 'Person', name: r.name }, reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 }, reviewBody: r.text })) } : {}),
     ...(videos.some((v) => v.type === 'youtube') ? { subjectOf: videos.filter((v) => v.type === 'youtube').map((v) => ({ '@type': 'VideoObject', name: `${p.name} video`, description: p.description || p.name, thumbnailUrl: v.thumb, uploadDate: new Date(p.updatedAt || p.createdAt || Date.now()).toISOString(), embedUrl: `https://www.youtube.com/embed/${v.id}`, contentUrl: v.url })) } : {}),
     offers: {
@@ -96,9 +99,9 @@ export default async function ProductPage({ params }) {
         <nav aria-label="Breadcrumb" className="mb-4 text-xs text-faint">
           <Link href="/" className="hover:text-gold">Home</Link> / <Link href="/products" className="hover:text-gold">Products</Link> / {p.category && <><Link href={`/category/${slugify(p.category)}`} className="hover:text-gold">{p.category}</Link> / </>}{p.name}
         </nav>
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid min-w-0 gap-8 lg:grid-cols-2">
           <Gallery images={p.images} name={p.name} />
-          <div>
+          <div className="min-w-0">
             <div className="flex items-start justify-between gap-3"><h1 className="text-2xl font-extrabold leading-tight sm:text-4xl">{p.name}</h1><WishButton product={p} className="shrink-0" /></div>
             <p className="mt-4 flex flex-wrap items-baseline gap-3">
               <span className="text-3xl font-bold text-gold">{formatPKR(p.price)}</span>
@@ -116,6 +119,17 @@ export default async function ProductPage({ params }) {
             </ul>
           </div>
         </div>
+
+        {p.specs.length > 0 && (
+          <section className="mt-10" aria-labelledby="specs">
+            <h2 id="specs" className="section-title mb-3">Product details</h2>
+            <dl className="overflow-hidden rounded-2xl border border-line bg-surface text-sm">
+              {p.specs.map((x, n) => (
+                <div key={x.k} className={`grid grid-cols-[2fr_3fr] gap-3 px-4 py-2.5 ${n % 2 ? 'bg-raised/60' : ''}`}><dt className="font-semibold text-dim">{x.k}</dt><dd className="min-w-0 break-words text-cream">{x.v}</dd></div>
+              ))}
+            </dl>
+          </section>
+        )}
 
         <section className="mt-12" aria-labelledby="rev">
           <h2 id="rev" className="section-title mb-3">Customer reviews</h2>

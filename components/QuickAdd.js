@@ -11,7 +11,7 @@ export default function QuickAdd({ p }) {
   const [done, setDone] = useState(false);
   if (!p.inStock) return <span className="block rounded-full bg-raised py-2 text-center text-xs font-semibold text-faint">Sold out</span>;
   if (p.sizes.length) {
-    return <Link href={`/product/${p.slug}`} className="block rounded-full border border-gold py-2 text-center text-xs font-semibold text-gold hover:bg-gold/10">Select size</Link>;
+    return <Link href={`/product/${p.slug}`} className="block rounded-full border border-gold py-2 text-center text-xs font-semibold text-gold hover:bg-gold/10">Choose options</Link>;
   }
   return (
     <button type="button" onClick={() => { add(p, { qty: 1 }); addToCart(p, 1); setDone(true); setTimeout(() => setDone(false), 1800); }}

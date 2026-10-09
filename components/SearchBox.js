@@ -4,7 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { searchProducts } from '@/lib/search';
+import { describeIntent, smartSearch } from '@/lib/search';
+import { aiIntent } from '@/lib/aiSearch';
 import { formatPKR } from '@/lib/format';
 
 // Search with live suggestions (loads the small product list the first time you tap the box).
@@ -22,7 +23,19 @@ export default function SearchBox({ id, className = '', categories = [] }) {
   }, []);
 
   const load = () => { if (!list) fetch('/api/search-index').then((r) => r.json()).then(setList).catch(() => setList([])); };
-  const hits = useMemo(() => (list ? searchProducts(list, q) : []), [list, q]);
+  const [ai, setAi] = useState(null);
+  const local = useMemo(() => (list ? smartSearch(list, q, { limit: 6 }) : { results: [], intent: {} }), [list, q]);
+  // Nothing found? Ask the optional AI helper to rephrase the sentence (does nothing if no key is set).
+  useEffect(() => {
+    setAi(null);
+    if (!list || q.trim().length < 4 || local.results.length) return undefined;
+    let live = true;
+    const t = setTimeout(async () => { const i = await aiIntent(q); if (live && i) setAi(smartSearch(list, q, { limit: 6, intent: i })); }, 700);
+    return () => { live = false; clearTimeout(t); };
+  }, [list, q, local.results.length]);
+  const view = ai && ai.results.length ? ai : local;
+  const hits = view.results;
+  const chips = describeIntent(view.intent || {});
   const go = (e) => { e.preventDefault(); setOpen(false); router.push(q.trim() ? `/products?q=${encodeURIComponent(q.trim())}` : '/products'); };
 
   return (
@@ -47,6 +60,7 @@ export default function SearchBox({ id, className = '', categories = [] }) {
             <p className="p-3 text-sm text-dim">No match for &quot;{q}&quot;. Try another word, or <Link href="/products" className="font-bold text-gold" onClick={() => setOpen(false)}>browse all products</Link>.</p>
           ) : (
             <ul>
+              {chips.length > 0 && <li className="flex flex-wrap items-center gap-1.5 border-b border-line bg-gold/5 px-3 py-2 text-xs"><span className="font-bold text-gold">Understood:</span>{chips.map((c) => <span key={c} className="rounded-full bg-white px-2 py-0.5 font-semibold text-dim">{c}</span>)}</li>}
               {hits.map((p) => (
                 <li key={p.id}><Link href={`/product/${p.slug}`} onClick={() => setOpen(false)} className="flex items-center gap-3 px-3 py-2 hover:bg-raised">
                   <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-raised">{p.image && <Image src={p.image} alt="" fill sizes="44px" className="object-cover" />}</span>

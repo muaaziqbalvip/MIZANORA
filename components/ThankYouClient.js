@@ -26,7 +26,7 @@ export default function ThankYouClient() {
   useEffect(() => { if (order) purchase(order); }, [order]);
 
   const orderId = order ? order.orderId : id;
-  const lines = order ? order.items.map((i) => `${i.name}${i.size ? ` (size ${i.size})` : ''} x${i.qty}`).join(', ') : '';
+  const lines = order ? order.items.map((i) => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.qty}`).join(', ') : '';
   const msg = order
     ? `Assalam o Alaikum, I placed order ${order.orderId} on Mizanora.\nName: ${order.customer.name}\nItems: ${lines}\nTotal to pay (COD): ${formatPKR(order.total)}\nCity: ${order.customer.city}\nI need help with this order.`
     : `Assalam o Alaikum, I placed order ${orderId} on Mizanora and need help.`;

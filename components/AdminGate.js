@@ -141,7 +141,7 @@ export default function AdminGate({ children }) {
     <Link href={href} className={`rounded-full px-4 py-2 text-sm font-semibold ${pathname.startsWith(href) ? 'bg-gold text-ink' : 'bg-raised text-dim'}`}>{label}</Link>
   );
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <div className="mx-auto w-full max-w-6xl min-w-0 px-3 py-4 sm:px-4 sm:py-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">{tab('/admin/orders', 'Orders')}{tab('/admin/products', 'Products')}{tab('/admin/banners', 'Banners')}{tab('/admin/coupons', 'Coupons')}{tab('/admin/reviews', 'Reviews')}</div>
         <button onClick={() => signOut(authClient())} className="flex items-center gap-2 text-sm text-dim hover:text-gold"><LogOut size={16} /> Sign out</button>
