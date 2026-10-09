@@ -8,8 +8,8 @@ service cloud.firestore {
     // IMPORTANT: keep YOUR admin UID / email here when you publish. Do not publish the PASTE_... placeholders.
     function isAdmin() {
       return request.auth != null && (
-        request.auth.uid == 'PASTE_ADMIN_UID_HERE' ||
-        (request.auth.token.email_verified == true && request.auth.token.email in ['PASTE_ADMIN_EMAIL_HERE@gmail.com'])
+        request.auth.uid == 'DglYQrY8XIXiwwpDVjEJ7ij1cDw1' ||
+        (request.auth.token.email_verified == true && request.auth.token.email in ['mezanora.market@gmail.com'])
       );
     }
 
