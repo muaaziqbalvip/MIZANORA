@@ -59,7 +59,13 @@ export default function AdminGate({ children }) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16">
         <h1 className="mb-6 text-center text-4xl font-bold">Admin login</h1>
-        {user && !allowed && <p className="mb-3 rounded-xl bg-red-500/10 p-3 text-sm text-red-300">This account is not the store admin.</p>}
+        {user && !allowed && (
+          <div className="mb-3 rounded-xl bg-red-500/10 p-3 text-sm text-red-300">
+            <p>This account is not the store admin.</p>
+            <p className="mt-1 break-all">Signed in as: <b>{user.email || 'unknown'}</b></p>
+            <button type="button" onClick={() => signOut(authClient())} className="mt-2 rounded-full border border-red-300/60 px-4 py-1.5 font-semibold">Sign out and try again</button>
+          </div>
+        )}
         <div className="card space-y-4">
           <button type="button" onClick={google} disabled={busy} className="btn-gold w-full"><GoogleG /> Continue with Google</button>
           <p className="text-center text-xs text-faint">or sign in with email</p>
@@ -70,7 +76,6 @@ export default function AdminGate({ children }) {
           {err && <p role="alert" className="field-err">{err}</p>}
           <button className="btn-gold w-full" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}</button>
           </form>
-        {user && !allowed && <button type="button" className="btn-ghost mt-3 w-full" onClick={() => signOut(authClient())}>Sign out</button>}
       </div>
     );
   }
