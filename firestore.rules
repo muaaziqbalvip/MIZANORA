@@ -16,6 +16,7 @@ service cloud.firestore {
     // Anyone can read the catalog and banners. Only the admin can change them.
     match /products/{id} { allow read: if true; allow write: if isAdmin(); }
     match /banners/{id}  { allow read: if true; allow write: if isAdmin(); }
+    match /reels/{id}    { allow read: if true; allow write: if isAdmin(); }
 
     // Orders are created ONLY by the server (/api/orders uses the Admin SDK, which bypasses these rules).
     // A signed-in customer can read ONLY their own orders (orders carry the customer's uid). The admin reads all.

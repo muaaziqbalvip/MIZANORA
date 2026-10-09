@@ -269,6 +269,7 @@ export default function CheckoutClient() {
         {serverError && (
           <div role="alert" className="rounded-xl border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-700">
             {serverError}{' '}
+            <a className="font-bold underline" target="_blank" rel="noopener noreferrer" href={waLink(`Assalam o Alaikum, my order could not be placed on the website. Items: ${items.map((i) => `${i.name}${i.size ? ` (${i.size})` : ''} x${i.qty}`).join(', ')}. Total: ${formatPKR(total)}. Name: ${form.name}, Phone: ${form.phone}, Address: ${form.address}, ${form.city === 'Other' ? form.cityOther : form.city}.`)}>Send this order to support on WhatsApp</a>{' '}
             <a className="underline" href={waLink('Assalam o Alaikum, I need help placing my order on the website.')} target="_blank" rel="noopener noreferrer">Contact support</a>
           </div>
         )}

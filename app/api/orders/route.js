@@ -40,8 +40,8 @@ export async function POST(req) {
   const rawItems = Array.isArray(body.items) ? body.items.slice(0, 15) : [];
   if (!rawItems.length) return fail('Your cart is empty.');
 
-  const db = adminDb();
   try {
+    const db = adminDb();
     const ids = [...new Set(rawItems.map((i) => String(i.id || '')))].filter(Boolean);
     if (!ids.length) return fail('Your cart is empty.');
     const snaps = await db.getAll(...ids.map((id) => db.collection('products').doc(id)));
@@ -110,7 +110,7 @@ export async function POST(req) {
       order: { orderId, createdAtMs: now, status: 'Pending', customer: clean, items, subtotal, discount, couponCode, shipping, total },
     });
   } catch (e) {
-    console.error('order failed', e);
-    return fail('We could not place your order right now. Please try again, or contact support on WhatsApp.', 500);
+    console.error('order failed', e && e.message);
+    return fail('Our order system is having a problem right now. Your order was not placed. Please try again in a minute, or send it to support on WhatsApp.', 500);
   }
 }

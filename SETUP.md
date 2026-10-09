@@ -125,3 +125,13 @@ Meta extras: events Search, AddToWishlist, CompleteRegistration and Contact are 
 - The anti-spam limit now counts only orders that were really placed, so mistakes, coupon tries and test attempts can no longer show "Too many orders".
 - Checkout has a "Review and confirm" sheet: items, address and total to pay, with Edit and Place order. After ordering, an animated confirmation shows the Order ID, the amount to pay, and what happens next.
 - The shop tells the browser it is a light-theme site, so phone "force dark mode" no longer turns it black.
+
+## 13. If orders fail ("We could not place your order")
+Open `https://YOUR-SITE/api/health`. Look at `ordersCanBeSaved` and `ordersProblem`. The same message shows at the top of /admin.
+The usual cause is a wrongly pasted `FIREBASE_PRIVATE_KEY` in Vercel. The easy fix: in Vercel add ONE variable `FIREBASE_SERVICE_ACCOUNT` and paste the **whole contents** of the downloaded service-account `.json` file (Firebase > Project settings > Service accounts > Generate new private key). Then Redeploy. The old two variables can stay or be removed.
+
+## 14. Reels (watch and shop)
+- **Admin > Reels > Add reel.** Paste a YouTube Short, Facebook reel, Instagram reel, TikTok or .mp4 link, give it a title, and choose the product. Shoppers see it in "Reels: watch and shop" on the home page and on `/reels`. Tapping opens it full screen with a **Shop now** button (goes to the product), a price, share, and up/down buttons (or swipe on the left edge of the screen) for the next reel.
+- Videos you already added inside products appear in Reels automatically.
+- **Publish the updated `firestore.rules`** again (it now has a `reels` section).
+- Facebook, Instagram and TikTok only play if the original post is public and allows embedding. If one will not play, the viewer has an "Open original" button.

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShieldCheck, Truck, Headphones, Banknote, Footprints, Shirt, Gem, Baby, Smartphone, Cpu, Home as HomeIcon, Sparkles, Dumbbell, HeartPulse, ShoppingBasket, Car, ArrowRight } from 'lucide-react';
 import { SITE } from '@/lib/config';
-import { getProducts, getBanners, buildCategories } from '@/lib/products';
+import { getProducts, getBanners, getReels, buildCategories } from '@/lib/products';
 import { getPosts } from '@/lib/blog';
 import { FAQ } from '@/lib/faq';
 import { pageMeta, faqJsonLd } from '@/lib/seo';
@@ -13,8 +13,7 @@ import ReorderBanner from '@/components/ReorderBanner';
 import Marquee from '@/components/Marquee';
 import SignInStrip from '@/components/SignInStrip';
 import RecentlyViewed from '@/components/RecentlyViewed';
-import { parseVideos } from '@/lib/video';
-import { Play } from 'lucide-react';
+import ReelsRail from '@/components/ReelsRail';
 import { DEPARTMENTS } from '@/lib/departments';
 import JsonLd from '@/components/JsonLd';
 import { SOCIAL_ICONS } from '@/components/Icons';
@@ -54,7 +53,7 @@ function Shelf({ id, title, href, products, priorityFirst = false, tone = '' }) 
 }
 
 export default async function Home() {
-  const [all, banners] = await Promise.all([getProducts(), getBanners()]);
+  const [all, banners, reels] = await Promise.all([getProducts(), getBanners(), getReels()]);
   const categories = buildCategories(all);
   const deals = all.filter((p) => discountPct(p.price, p.comparePrice) > 0)
     .sort((a, b) => discountPct(b.price, b.comparePrice) - discountPct(a.price, a.comparePrice)).slice(0, 10);
@@ -62,7 +61,6 @@ export default async function Home() {
   const fresh = all.slice(0, 12);
   const shelves = categories.map((c) => ({ c, items: all.filter((p) => p.category === c.name).slice(0, 10) }));
   const posts = getPosts().slice(0, 4);
-  const withVideo = all.map((p) => ({ p, v: parseVideos(p.videos)[0] })).filter((x) => x.v).slice(0, 10);
   const socials = SITE.social.filter((s) => s.url);
   const delivery = SITE.shippingFee > 0 ? `Delivery ${formatPKR(SITE.shippingFee)}` : 'Free delivery';
 
@@ -126,19 +124,10 @@ export default async function Home() {
         </section>
       )}
 
-      {withVideo.length > 0 && (
-        <section className="mx-auto max-w-7xl px-3 pt-8 sm:px-4" aria-labelledby="vids">
-          <div className="mb-3 flex items-end justify-between"><h2 id="vids" className="section-title">Watch and shop</h2><Link href="/products" className="flex items-center gap-1 text-sm font-bold text-gold">More <ArrowRight size={15} /></Link></div>
-          <div className="no-sb flex snap-x gap-3 overflow-x-auto pb-2">
-            {withVideo.map(({ p, v }) => (
-              <Link key={p.id} href={`/product/${p.slug}`} className="group relative aspect-[9/14] w-40 shrink-0 snap-start overflow-hidden rounded-2xl bg-cream sm:w-48">
-                {(v.thumb || p.images[0]) && <Image src={v.thumb || p.images[0]} alt={`${p.name} video`} fill sizes="192px" className="object-cover transition group-hover:scale-105" />}
-                <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
-                <span className="absolute left-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-white/95 text-gold"><Play size={16} fill="currentColor" /></span>
-                <span className="absolute inset-x-2 bottom-2 text-white"><span className="line-clamp-2 block text-sm font-bold leading-tight">{p.name}</span><span className="text-sm font-extrabold text-saffron">{formatPKR(p.price)}</span></span>
-              </Link>
-            ))}
-          </div>
+      {reels.length > 0 && (
+        <section className="mx-auto max-w-7xl px-3 pt-8 sm:px-4" aria-labelledby="reels">
+          <div className="mb-3 flex items-end justify-between"><h2 id="reels" className="section-title">Reels: watch and shop</h2><Link href="/reels" className="flex items-center gap-1 text-sm font-bold text-gold">All reels <ArrowRight size={15} /></Link></div>
+          <ReelsRail reels={reels.slice(0, 12)} />
         </section>
       )}
 

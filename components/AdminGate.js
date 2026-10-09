@@ -39,7 +39,7 @@ function SetupCheck() {
   const todo = [];
   if (!h.firebaseWebConfig) todo.push('NEXT_PUBLIC_FIREBASE_API_KEY and NEXT_PUBLIC_FIREBASE_PROJECT_ID are missing in Vercel (the shop cannot read products).');
   if (!h.imgbbKey) todo.push('IMGBB_API_KEY is missing in Vercel, so photo upload will fail. Add it, then Redeploy.');
-  if (!h.firebaseAdminKey) todo.push('FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY are missing or wrong. Products still show, but orders cannot be saved until you fix them.');
+  if (h.ordersCanBeSaved === false) todo.push(`ORDERS ARE FAILING: ${h.ordersProblem}`);
   if (!h.metaPixel) todo.push('NEXT_PUBLIC_META_PIXEL_ID is missing, so Meta Pixel is off.');
   if (!todo.length) return null;
   return (
@@ -143,7 +143,7 @@ export default function AdminGate({ children }) {
   return (
     <div className="mx-auto w-full max-w-6xl min-w-0 px-3 py-4 sm:px-4 sm:py-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">{tab('/admin/orders', 'Orders')}{tab('/admin/products', 'Products')}{tab('/admin/banners', 'Banners')}{tab('/admin/coupons', 'Coupons')}{tab('/admin/reviews', 'Reviews')}</div>
+        <div className="flex flex-wrap gap-2">{tab('/admin/orders', 'Orders')}{tab('/admin/products', 'Products')}{tab('/admin/banners', 'Banners')}{tab('/admin/reels', 'Reels')}{tab('/admin/coupons', 'Coupons')}{tab('/admin/reviews', 'Reviews')}</div>
         <button onClick={() => signOut(authClient())} className="flex items-center gap-2 text-sm text-dim hover:text-gold"><LogOut size={16} /> Sign out</button>
       </div>
       <SetupCheck />
