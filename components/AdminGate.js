@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, signOut } from 'firebase/auth';
 import { LogOut } from 'lucide-react';
-import { authClient, firebaseConfigured } from '@/lib/firebase-client';
-import { SITE } from '@/lib/config';
+import { collection, getDocs, limit, query } from 'firebase/firestore';
+import { authClient, dbClient, firebaseConfigured } from '@/lib/firebase-client';
 
 // Login wall for /admin. The REAL protection is in firestore.rules (only the admin UID can read orders).
 export default function AdminGate({ children }) {
@@ -14,12 +14,25 @@ export default function AdminGate({ children }) {
   const [pw, setPw] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [access, setAccess] = useState('checking'); // checking | ok | denied
   const pathname = usePathname();
 
   useEffect(() => {
     if (!firebaseConfigured) { setUser(null); return undefined; }
     return onAuthStateChanged(authClient(), (u) => setUser(u || null));
   }, []);
+
+  // Ask Firestore itself whether this account is the admin (same rules that protect the orders).
+  // No environment variable is needed for this check.
+  useEffect(() => {
+    if (!user) { setAccess('checking'); return undefined; }
+    let live = true;
+    setAccess('checking');
+    getDocs(query(collection(dbClient(), 'orders'), limit(1)))
+      .then(() => live && setAccess('ok'))
+      .catch((e) => live && setAccess(e && e.code === 'permission-denied' ? 'denied' : 'ok'));
+    return () => { live = false; };
+  }, [user]);
 
   async function google() {
     setBusy(true); setErr('');
@@ -54,7 +67,8 @@ export default function AdminGate({ children }) {
   }
   if (user === undefined) return <p className="p-8 text-dim">Loading...</p>;
 
-  const allowed = user && (SITE.adminEmails.length === 0 || SITE.adminEmails.includes((user.email || '').toLowerCase()));
+  if (user && access === 'checking') return <p className="p-8 text-dim">Checking access...</p>;
+  const allowed = Boolean(user) && access === 'ok';
   if (!user || !allowed) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16">
@@ -63,6 +77,7 @@ export default function AdminGate({ children }) {
           <div className="mb-3 rounded-xl bg-red-500/10 p-3 text-sm text-red-300">
             <p>This account is not the store admin.</p>
             <p className="mt-1 break-all">Signed in as: <b>{user.email || 'unknown'}</b></p>
+            <p className="mt-1 break-all text-xs text-red-200/80">Your UID: {user.uid}<br />Firestore rules only allow the UID or the verified email you pasted in the rules. Add this account there and click Publish.</p>
             <button type="button" onClick={() => signOut(authClient())} className="mt-2 rounded-full border border-red-300/60 px-4 py-1.5 font-semibold">Sign out and try again</button>
           </div>
         )}
