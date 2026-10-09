@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle2 } from 'lucide-react';
+import { BadgeCheck, PackageCheck, PhoneCall, Truck } from 'lucide-react';
 import { SITE, waLink } from '@/lib/config';
 import { formatPKR } from '@/lib/format';
 import { purchase } from '@/lib/metaPixel';
@@ -33,11 +33,25 @@ export default function ThankYouClient() {
 
   return (
     <div>
-      <div className="text-center">
-        <CheckCircle2 className="mx-auto text-gold" size={56} />
-        <h1 className="mt-3 text-3xl font-extrabold sm:text-4xl">Order confirmed. Thank you!</h1>
-        {orderId && <p className="mt-2 text-dim">Your order ID is <b className="text-cream">{orderId}</b></p>}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#073D28] via-[#0B6B45] to-[#0E8556] px-5 pb-8 pt-10 text-center text-white shadow-xl">
+        {[8, 18, 30, 42, 55, 66, 78, 90].map((l, n) => (
+          <span key={l} aria-hidden="true" className="mz-anim absolute top-0 h-2.5 w-1.5 rounded-sm" style={{ left: `${l}%`, background: ['#F29F05', '#fff', '#7be0b0', '#ffd479'][n % 4], animation: `mz-fall ${2.2 + (n % 3) * 0.5}s ease-in ${n * 0.12}s infinite` }} />
+        ))}
+        <div className="relative mx-auto grid h-20 w-20 place-items-center">
+          <span className="mz-anim absolute inset-0 rounded-full bg-white/40" style={{ animation: 'mz-ring 1.8s ease-out infinite' }} aria-hidden="true" />
+          <span className="mz-anim relative grid h-20 w-20 place-items-center rounded-full bg-white text-gold shadow-lg" style={{ animation: 'mz-pop .6s ease-out both' }}><BadgeCheck size={46} /></span>
+        </div>
+        <h1 className="mt-4 text-3xl font-extrabold sm:text-4xl">Order confirmed</h1>
+        <p className="mt-1 text-white/85">Thank you for shopping with Mizanora</p>
+        {orderId && <p className="mx-auto mt-4 w-fit rounded-full bg-white/15 px-4 py-1.5 text-sm">Order ID <b className="ml-1 tracking-wider">{orderId}</b></p>}
+        {order && <p className="mt-3 text-2xl font-extrabold text-saffron">{formatPKR(order.total)} <span className="text-sm font-semibold text-white/80">to pay on delivery</span></p>}
       </div>
+
+      <ol className="mt-5 grid gap-2.5 sm:grid-cols-3">
+        {[[PhoneCall, 'We confirm', 'We call or message you to confirm the order.'], [PackageCheck, 'We pack and dispatch', 'Your parcel is handed to the courier.'], [Truck, 'You pay on delivery', 'Check the parcel, then pay the rider.']].map(([Icon, t, d], n) => (
+          <li key={t} className="flex items-start gap-3 rounded-2xl border border-line bg-surface p-3.5"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/10 text-gold"><Icon size={20} /></span><span className="text-sm"><b className="block">{n + 1}. {t}</b><span className="text-dim">{d}</span></span></li>
+        ))}
+      </ol>
 
       <p className="mt-4 rounded-xl border border-line bg-surface p-4 text-center text-dim">We will call or message <b className="text-cream">{order ? order.customer.phone : 'your number'}</b> to confirm your order. Please keep your phone nearby.</p>
       <a href={waLink(msg)} target="_blank" rel="noopener noreferrer" className="btn-wa mt-4 w-full">

@@ -13,16 +13,11 @@ import { adminApp } from '@/lib/firebase-admin';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Best-effort rate limit (per server instance). Real protection is the validation + honeypot + server-side pricing.
-const hits = new Map();
-function limited(ip) {
-  const now = Date.now();
-  const arr = (hits.get(ip) || []).filter((t) => now - t < 10 * 60 * 1000);
-  arr.push(now);
-  hits.set(ip, arr);
-  if (hits.size > 5000) hits.clear();
-  return arr.length > 6;
-}
+// Best-effort anti-spam (per server instance): only orders that were really placed are counted, so typing mistakes,
+// coupon tries and test attempts can never lock a real customer out. Real protection is validation + honeypot + server-side pricing.
+const placed = new Map();
+const recentCount = (ip) => { const now = Date.now(); const a = (placed.get(ip) || []).filter((t) => now - t < 10 * 60 * 1000); placed.set(ip, a); return a.length; };
+const countOrder = (ip) => { const a = placed.get(ip) || []; a.push(Date.now()); placed.set(ip, a); if (placed.size > 5000) placed.clear(); };
 
 const newOrderId = () => `MZ-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 const fail = (msg, status = 400) => NextResponse.json({ ok: false, error: msg }, { status });
@@ -31,7 +26,7 @@ export async function POST(req) {
   if (!adminReady()) return fail('The store is not fully set up yet. Please contact support on WhatsApp.', 503);
 
   const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown';
-  if (limited(ip)) return fail('Too many orders from this connection. Please wait a few minutes or contact support on WhatsApp.', 429);
+  if (recentCount(ip) >= 12) return fail('You have placed several orders in a short time. Please wait a few minutes, or contact support on WhatsApp if you need more.', 429);
 
   let body;
   try { body = await req.json(); } catch { return fail('Invalid request'); }
@@ -94,6 +89,7 @@ export async function POST(req) {
       catch (e) { if (attempt === 3) throw e; } // ID collision is extremely unlikely; retry
     }
 
+    countOrder(ip);
     if (couponCode) { try { await db.collection('coupons').doc(couponCode).update({ used: FieldValue.increment(1) }); } catch (_) { /* counting is best effort */ } }
 
     // Server-side Purchase (Conversions API). Same eventID as the browser Purchase so Meta counts it once.

@@ -13,6 +13,7 @@ export async function GET() {
     firebaseWebConfig: restReady(),
     firebaseAdminKey: adminReady(),
     imgbbKey: Boolean(process.env.IMGBB_API_KEY),
+    geminiAiSearch: Boolean(process.env.GEMINI_API_KEY),
     metaPixel: Boolean(process.env.NEXT_PUBLIC_META_PIXEL_ID),
     metaCapiToken: Boolean(process.env.META_CAPI_TOKEN),
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL || null,

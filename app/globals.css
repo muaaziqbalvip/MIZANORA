@@ -14,7 +14,7 @@
   .btn-gold, .btn-ghost, .btn-wa {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-[0.95rem] font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
-  .btn-gold { @apply border border-gold bg-gold text-white hover:bg-goldhi; }
+  .btn-gold { @apply border border-gold bg-gradient-to-b from-[#0E8556] to-[#0B6B45] text-white shadow-[0_8px_20px_-6px_rgba(11,107,69,.55)] hover:brightness-95; }
   .btn-sun { @apply inline-flex items-center justify-center gap-2 rounded-full border border-saffron bg-saffron px-6 py-3.5 text-[0.95rem] font-bold text-[#2B1B00] transition hover:brightness-95 active:scale-[0.98]; }
   .btn-ghost { @apply border border-gold bg-transparent text-gold hover:bg-gold/10; }
   .btn-wa { @apply border border-wa bg-wa text-[#04210f] hover:brightness-110; }
@@ -22,7 +22,7 @@
   .input-err { @apply border-red-500; }
   .label { @apply mb-1.5 block text-sm font-medium text-cream; }
   .field-err { @apply mt-1.5 text-sm text-red-600; }
-  .card { @apply rounded-2xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(18,32,26,.05)]; }
+  .card { @apply rounded-2xl border border-line bg-surface p-5 shadow-[0_2px_14px_-4px_rgba(18,32,26,.12)]; }
   .section-title { @apply font-display text-2xl font-extrabold sm:text-3xl; }
 }
 
@@ -62,3 +62,10 @@ img, video, iframe, svg { max-width: 100%; }
 main, section, article, form, ul, ol, dl { min-width: 0; }
 /* 16px inputs stop the browser from zooming in when you tap a field */
 @media (max-width: 767px) { input, select, textarea { font-size: 16px !important; } }
+
+:root { color-scheme: light; }
+@keyframes mz-pop { 0% { transform: scale(.3); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes mz-ring { 0% { transform: scale(.8); opacity: .55; } 100% { transform: scale(2.1); opacity: 0; } }
+@keyframes mz-fall { 0% { transform: translateY(-20px) rotate(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(170px) rotate(320deg); opacity: 0; } }
+@keyframes mz-sheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .mz-anim { animation: none !important; } }

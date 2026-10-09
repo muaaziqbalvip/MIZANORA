@@ -119,4 +119,9 @@ Meta extras: events Search, AddToWishlist, CompleteRegistration and Contact are 
 - **Screen no longer spreads sideways, and pinch-zoom is off.** (Zoom is disabled on purpose, as requested.)
 - **Admin on phone:** the products list and the add/edit form are now separate screens with a Back button. Photo upload has a Photos button (opens the gallery picker) and a Camera button. Some phones (for example Oppo/Realme) open their Files app for the Photos button; choose Photos/Gallery on the left of that screen. Videos cannot be uploaded to ImgBB: upload to YouTube/Facebook and paste the link.
 - **Smart search** understands English, Roman Urdu and Hindi, colours and prices: `laal suit 2000 se kam`, `black joota under 5k`, `sasta watch`. It tolerates spelling mistakes. No key needed.
-- **Optional real AI search:** add `ANTHROPIC_API_KEY` in Vercel (and optionally `AI_SEARCH_MODEL`). When the normal search finds nothing, an AI model rephrases the sentence into keywords and filters. Without the key nothing breaks.
+- **Optional AI search (Google Gemini):** get a free key at https://aistudio.google.com/apikey and add `GEMINI_API_KEY` in Vercel, then Redeploy. Optionally set `GEMINI_MODEL` (default `gemini-flash-latest`). When the normal search finds nothing, Gemini rephrases the sentence into keywords and filters. Without the key nothing breaks.
+
+## 12. Order placing fixes
+- The anti-spam limit now counts only orders that were really placed, so mistakes, coupon tries and test attempts can no longer show "Too many orders".
+- Checkout has a "Review and confirm" sheet: items, address and total to pay, with Edit and Place order. After ordering, an animated confirmation shows the Order ID, the amount to pay, and what happens next.
+- The shop tells the browser it is a light-theme site, so phone "force dark mode" no longer turns it black.

@@ -22,6 +22,7 @@ const body = Inter({ subsets: ['latin'], variable: '--font-body', display: 'swap
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
+  colorScheme: 'light',
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',

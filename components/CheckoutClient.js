@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Loader2, MapPin, Tag } from 'lucide-react';
+import { Loader2, Lock, MapPin, Pencil, ShieldCheck, Tag, Truck } from 'lucide-react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { authClient, dbClient } from '@/lib/firebase-client';
 import { useAuth } from './AuthProvider';
@@ -24,6 +24,7 @@ export default function CheckoutClient() {
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [serverError, setServerError] = useState('');
+  const [pending, setPending] = useState(null); // validated delivery details waiting for the customer's final confirmation
   const { user } = useAuth();
   const [addrs, setAddrs] = useState([]);
   const [pick, setPick] = useState('');
@@ -108,6 +109,12 @@ export default function CheckoutClient() {
     }
     setErrors({});
     setServerError('');
+    setPending(clean); // show the review sheet; the order is only sent when the customer taps Place order
+  }
+
+  async function place() {
+    const clean = pending;
+    if (!clean || busy) return;
     setBusy(true);
     try {
       const headers = { 'Content-Type': 'application/json' };
@@ -144,6 +151,7 @@ export default function CheckoutClient() {
       router.push(`/thank-you?id=${encodeURIComponent(data.order.orderId)}`);
     } catch (err) {
       setServerError(err.message);
+      setPending(null);
       setBusy(false);
     }
   }
@@ -169,6 +177,12 @@ export default function CheckoutClient() {
   );
 
   return (
+    <>
+    <ol className="mx-auto mb-6 flex max-w-md items-center justify-between text-xs font-bold" aria-label="Checkout steps">
+      {['Cart', 'Details', 'Confirm'].map((t, n) => (
+        <li key={t} className="flex flex-1 items-center gap-2 last:flex-none"><span className={`grid h-7 w-7 place-items-center rounded-full ${n < 2 ? 'bg-gold text-white' : 'bg-raised text-faint'}`}>{n + 1}</span><span className={n < 2 ? 'text-cream' : 'text-faint'}>{t}</span>{n < 2 && <span className="h-px flex-1 bg-line" />}</li>
+      ))}
+    </ol>
     <form ref={formRef} onSubmit={submit} noValidate className="grid gap-8 lg:grid-cols-[1fr_22rem]">
       <div className="space-y-4">
         <h2 className="text-2xl font-extrabold">Delivery details</h2>
@@ -259,10 +273,52 @@ export default function CheckoutClient() {
           </div>
         )}
         <button type="submit" disabled={busy} className="btn-gold w-full !py-4 text-base">
-          {busy ? <><Loader2 className="animate-spin" size={20} /> Placing order...</> : `Confirm order · ${formatPKR(total)}`}
+          {busy ? <><Loader2 className="animate-spin" size={20} /> Placing order...</> : `Review and confirm · ${formatPKR(total)}`}
         </button>
         <p className="text-center text-xs text-faint">Cash on delivery. We will confirm your order by phone or message before dispatch. WhatsApp is for support only.</p>
       </aside>
+
+      {pending && (
+        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Confirm your order">
+          <div className="mz-anim max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl" style={{ animation: 'mz-sheet .28s ease-out' }}>
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-line sm:hidden" />
+            <h2 className="text-2xl font-extrabold">Confirm your order</h2>
+            <p className="text-sm text-dim">Please check everything once. You pay only when the parcel reaches you.</p>
+
+            <ul className="mt-4 space-y-2.5">
+              {items.map((i) => (
+                <li key={i.key} className="flex items-center gap-3 rounded-xl bg-raised p-2.5">
+                  <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white">{i.image && <Image src={i.image} alt="" fill sizes="56px" className="object-cover" />}</span>
+                  <span className="min-w-0 flex-1 text-sm"><b className="line-clamp-2">{i.name}</b><span className="block text-faint">{i.size ? `${i.size} · ` : ''}Qty {i.qty}</span></span>
+                  <b className="shrink-0 text-sm">{formatPKR(i.price * i.qty)}</b>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 rounded-xl border border-line p-3 text-sm">
+              <div className="flex items-start justify-between gap-2"><p className="flex items-center gap-1.5 font-bold"><MapPin size={15} className="text-gold" /> Deliver to</p>
+                <button type="button" onClick={() => setPending(null)} className="inline-flex items-center gap-1 text-xs font-bold text-gold"><Pencil size={13} /> Edit</button></div>
+              <p className="mt-1 font-semibold">{pending.name} · {pending.phone}</p>
+              <p className="text-dim">{pending.address}, {pending.city}, {pending.province}</p>
+              {pending.landmark && <p className="text-faint">Landmark: {pending.landmark}</p>}
+            </div>
+
+            <dl className="mt-4 space-y-1.5 text-sm">
+              <div className="flex justify-between"><dt className="text-dim">Subtotal</dt><dd>{formatPKR(subtotal)}</dd></div>
+              {discount > 0 && <div className="flex justify-between text-gold"><dt>Discount ({coupon.code})</dt><dd>- {formatPKR(discount)}</dd></div>}
+              <div className="flex justify-between"><dt className="text-dim">Delivery</dt><dd>{shipping > 0 ? formatPKR(shipping) : 'Free'}</dd></div>
+              <div className="flex items-center justify-between border-t border-line pt-2.5 text-xl font-extrabold"><dt>Total to pay</dt><dd className="text-gold">{formatPKR(total)}</dd></div>
+            </dl>
+
+            <button type="button" onClick={place} disabled={busy} className="btn-gold mt-5 w-full !py-4 text-lg">
+              {busy ? <><Loader2 className="animate-spin" size={20} /> Placing your order...</> : <><Lock size={18} /> Place order · {formatPKR(total)}</>}
+            </button>
+            <button type="button" onClick={() => setPending(null)} disabled={busy} className="mt-2 w-full py-2.5 text-sm font-semibold text-dim">Go back and edit</button>
+            <p className="mt-1 flex items-center justify-center gap-1.5 text-center text-xs text-faint"><ShieldCheck size={14} /> Cash on delivery. Your details are used only for this delivery.</p>
+          </div>
+        </div>
+      )}
     </form>
+    </>
   );
 }
