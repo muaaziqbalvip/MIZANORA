@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { dbClient, authClient } from '@/lib/firebase-client';
 import { formatPKR, slugify } from '@/lib/format';
+import ImageUploader from '@/components/ImageUploader';
 
 const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', sizes: '', inStock: true, featured: false, active: true };
 const SAMPLE = {
@@ -107,7 +108,23 @@ export default function AdminProducts() {
         </div>
         <div><label className="label" htmlFor="pk">Category</label><input id="pk" list="cats" className="input" value={form.category} onChange={set('category')} placeholder="e.g. Footwear" /><datalist id="cats">{[...new Set((list || []).map((x) => x.category).filter(Boolean))].map((c) => <option key={c} value={c} />)}</datalist></div>
         <div><label className="label" htmlFor="pd">Description</label><textarea id="pd" rows={5} className="input" value={form.description} onChange={set('description')} /></div>
-        <div><label className="label" htmlFor="pi">Image links (one per line)</label><textarea id="pi" rows={3} className="input" value={form.images} onChange={set('images')} placeholder="https://..." /></div>
+        <div>
+          <label className="label" htmlFor="pi">Photos (first photo is the main one)</label>
+          <ImageUploader onUploaded={(urls) => setForm((f) => ({ ...f, images: [f.images, ...urls].filter(Boolean).join('\n') }))} />
+          {String(form.images || '').split('\n').filter(Boolean).length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {String(form.images).split('\n').filter(Boolean).map((u, i) => (
+                <div key={u + i} className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={u} alt="" className="h-16 w-16 rounded-lg bg-raised object-cover" />
+                  <button type="button" aria-label="Remove photo" onClick={() => setForm((f) => ({ ...f, images: String(f.images).split('\n').filter((x, n) => x && n !== i).join('\n') }))}
+                    className="absolute -right-1.5 -top-1.5 grid h-5 w-5 place-items-center rounded-full bg-red-600 text-xs text-white">x</button>
+                </div>
+              ))}
+            </div>
+          )}
+          <textarea id="pi" rows={2} className="input mt-2" value={form.images} onChange={set('images')} placeholder="Or paste image links here, one per line" />
+        </div>
         <div><label className="label" htmlFor="pz">Sizes (comma separated, optional)</label><input id="pz" className="input" value={form.sizes} onChange={set('sizes')} placeholder="40, 41, 42, 43" /></div>
         <div className="flex flex-wrap gap-4 text-sm">
           {[['inStock', 'In stock'], ['featured', 'Featured on home'], ['active', 'Visible']].map(([k, l]) => (

@@ -30,6 +30,7 @@
 | FIREBASE_CLIENT_EMAIL | `client_email` from the JSON |
 | FIREBASE_PRIVATE_KEY | `private_key` from the JSON, in double quotes, keep the `\n` |
 | ADMIN_UID | the admin User UID (only needed for the email login) |
+| IMGBB_API_KEY | your ImgBB API key (secret, Vercel only). Lets /admin upload photos from your gallery |
 | NEXT_PUBLIC_ANNOUNCEMENT | optional text for the gold bar at the top of every page |
 | NEXT_PUBLIC_META_PIXEL_ID | your Pixel ID |
 | META_CAPI_TOKEN | Events Manager > Settings > Conversions API > Generate access token |
@@ -42,7 +43,7 @@
 1. Open `/admin`, sign in, go to **Products**, click "Add a sample product" or add your own (price, photo links, sizes).
 2. Open the product on the site > Order now > fill the form > Place order. You land on the thank-you page.
 3. In `/admin/orders` the order appears live. Change status, tap "WhatsApp customer", tap "Export CSV".
-4. Product photos: upload to ImgBB or Cloudinary (free) and paste the direct image links.
+4. Product photos: in /admin/products tap **Upload photos**, pick pictures from your gallery, then Save. Photos are shrunk automatically and stored on ImgBB. You can still paste image links instead.
 
 ## 3b. Make it look like a market (banners, categories, deals)
 - **Categories** appear automatically from the "Category" field of your products (menu bar, home page circles and `/category/...` pages). Use the same spelling for products in one category.

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { authClient, dbClient } from '@/lib/firebase-client';
+import ImageUploader from '@/components/ImageUploader';
 
 const EMPTY = { id: '', image: '', title: '', subtitle: '', link: '/products', cta: 'Shop now', order: 1, active: true };
 
@@ -79,7 +80,12 @@ export default function AdminBanners() {
 
       <form onSubmit={save} className="card h-fit space-y-3 lg:sticky lg:top-24">
         <h2 className="text-2xl font-semibold">{form.id ? 'Edit banner' : 'Add banner'}</h2>
-        <div><label className="label" htmlFor="bi">Image link</label><input id="bi" className="input" value={form.image} onChange={set('image')} placeholder="https://..." required /></div>
+        <div>
+          <label className="label" htmlFor="bi">Banner image</label>
+          <ImageUploader multiple={false} max={2000} label="Upload banner image" onUploaded={(urls) => setForm((f) => ({ ...f, image: urls[0] }))} />
+          {form.image && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={form.image} alt="" className="mt-2 aspect-[16/6] w-full rounded-xl bg-raised object-cover" />)}
+          <input id="bi" className="input mt-2" value={form.image} onChange={set('image')} placeholder="Or paste an image link (https://...)" required />
+        </div>
         <div><label className="label" htmlFor="bt">Title (optional)</label><input id="bt" className="input" value={form.title} onChange={set('title')} /></div>
         <div><label className="label" htmlFor="bs">Small text (optional)</label><input id="bs" className="input" value={form.subtitle} onChange={set('subtitle')} /></div>
         <div className="grid grid-cols-2 gap-3">
