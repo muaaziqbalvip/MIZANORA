@@ -3,7 +3,8 @@ import { NextResponse, after } from 'next/server';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, adminReady } from '@/lib/firebase-admin';
 import { validateCustomer, normalizePhone } from '@/lib/validate';
-import { SITE } from '@/lib/config';
+import { SITE, shippingFor } from '@/lib/config';
+import { effective } from '@/lib/sale';
 import { sendCapi } from '@/lib/capi';
 import { priceCoupon } from '@/lib/coupons';
 import { optionsOf, validVariant } from '@/lib/options';
@@ -18,6 +19,10 @@ export const dynamic = 'force-dynamic';
 const placed = new Map();
 const recentCount = (ip) => { const now = Date.now(); const a = (placed.get(ip) || []).filter((t) => now - t < 10 * 60 * 1000); placed.set(ip, a); return a.length; };
 const countOrder = (ip) => { const a = placed.get(ip) || []; a.push(Date.now()); placed.set(ip, a); if (placed.size > 5000) placed.clear(); };
+
+const cut = (v) => String(v || '').replace(/[<>]/g, '').slice(0, 80);
+const cleanTouch = (t) => (t && typeof t === 'object' ? { source: cut(t.source), medium: cut(t.medium), campaign: cut(t.campaign), content: cut(t.content) } : null);
+const cleanAttr = (a) => (a && typeof a === 'object' ? { first: cleanTouch(a.first), last: cleanTouch(a.last) } : null);
 
 const newOrderId = () => `MZ-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 const fail = (msg, status = 400) => NextResponse.json({ ok: false, error: msg }, { status });
@@ -57,10 +62,9 @@ export async function POST(req) {
       if (!(qty >= 1 && qty <= 10)) return fail('Invalid quantity.');
       const size = String(r.size || '');
       if (!validVariant(optionsOf(p), size)) return fail(`Please choose the options (for example colour and size) for ${p.name} again.`);
-      items.push({ id: String(r.id), slug: String(r.id), name: p.name, price: Number(p.price) || 0, qty, size, image: (p.images && p.images[0]) || '' });
+      items.push({ id: String(r.id), slug: String(r.id), name: p.name, price: effective(p.price, p.comparePrice, p.saleEndsAtMs).price, qty, size, image: (p.images && p.images[0]) || '' });
     }
     const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-    const shipping = SITE.shippingFee;
 
     // Optional: a signed-in customer's order is linked to their account so it shows in their order history.
     let uid = '', email = '';
@@ -74,11 +78,12 @@ export async function POST(req) {
       if (!r.ok) return fail(r.error);
       discount = r.discount; couponCode = r.code;
     }
+    const shipping = shippingFor(subtotal - discount);
     const total = subtotal - discount + shipping;
 
     const now = Date.now();
     const base = {
-      status: 'Pending', customer: clean, items, subtotal, discount, couponCode, shipping, total, paymentMethod: 'COD', uid, email,
+      status: 'Pending', customer: clean, items, subtotal, discount, couponCode, shipping, total, paymentMethod: 'COD', uid, email, marketingOptIn: Boolean(body.marketingOptIn), attribution: cleanAttr(body.attribution),
       createdAt: FieldValue.serverTimestamp(), createdAtMs: now, trackingId: '',
     };
 

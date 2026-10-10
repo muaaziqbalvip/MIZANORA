@@ -47,6 +47,9 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Anonymous search words (written by the server only). Admin can read them.
+    match /searchLogs/{id} { allow read: if isAdmin(); allow write: if false; }
+
     match /{document=**} { allow read, write: if false; }
   }
 }

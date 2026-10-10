@@ -1,6 +1,8 @@
 'use client';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { sfx, toast } from '@/lib/sound';
+
 const Ctx = createContext(null);
 const KEY = 'mz_cart';
 
@@ -25,6 +27,8 @@ export function CartProvider({ children }) {
   }, [items, ready]);
 
   const add = useCallback((p, { size = '', qty = 1 } = {}) => {
+    sfx.add();
+    toast(`${p.name.length > 28 ? `${p.name.slice(0, 28)}...` : p.name} added to cart`, { href: '/cart', label: 'View cart' });
     setItems((cur) => {
       const key = `${p.id}|${size}`;
       const found = cur.find((i) => i.key === key);

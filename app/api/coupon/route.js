@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb, adminReady } from '@/lib/firebase-admin';
 import { priceCoupon } from '@/lib/coupons';
+import { effective } from '@/lib/sale';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -17,7 +18,7 @@ export async function POST(req) {
     const db = adminDb();
     const snaps = await db.getAll(...ids.map((id) => db.collection('products').doc(id)));
     const byId = Object.fromEntries(snaps.filter((s) => s.exists).map((s) => [s.id, s.data()]));
-    const subtotal = rawItems.reduce((s, r) => s + (Number(byId[String(r.id)]?.price) || 0) * Math.max(1, Math.min(10, Math.floor(Number(r.qty)) || 1)), 0);
+    const subtotal = rawItems.reduce((s, r) => s + effective(byId[String(r.id)]?.price, byId[String(r.id)]?.comparePrice, byId[String(r.id)]?.saleEndsAtMs).price * Math.max(1, Math.min(10, Math.floor(Number(r.qty)) || 1)), 0);
     return NextResponse.json(await priceCoupon(db, b.code, subtotal));
   } catch (e) {
     console.error('coupon failed', e.message);

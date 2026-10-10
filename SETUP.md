@@ -135,3 +135,26 @@ The usual cause is a wrongly pasted `FIREBASE_PRIVATE_KEY` in Vercel. The easy f
 - Videos you already added inside products appear in Reels automatically.
 - **Publish the updated `firestore.rules`** again (it now has a `reels` section).
 - Facebook, Instagram and TikTok only play if the original post is public and allows embedding. If one will not play, the viewer has an "Open original" button.
+
+## 15. Version 7: sounds, smoothness, smarter search, 2027 SEO and marketing
+**Feel**
+- Soft sounds and a light vibration on taps, Add to cart, wishlist, coupon applied, order placed and errors. Shoppers can mute with the speaker icon in the header. "Added to cart" shows a small message with a View cart link. Pages fade in smoothly and sections glide in as you scroll.
+
+**Search**
+- Understands English, Roman Urdu and Urdu script, colours, price limits ("2000 se kam", "under 5k"), sasta/mehnga. Voice search (microphone). Recent searches and suggestions. Filters on /products: price range, category, colour, in stock.
+- **Admin > Searches** shows what people searched, and what found nothing, so you know what to add. (Publish the updated `firestore.rules`.)
+
+**Google and AI search (SEO 2027)**
+- **Google Merchant Center feed:** `https://YOUR-DOMAIN/api/feed/google`. In Merchant Center add it as a scheduled fetch. Free listings in Google Shopping/Search/Images.
+- **/llms.txt** summarises the shop for AI assistants and AI search. robots.txt welcomes Google, Bing and AI search crawlers on public pages and keeps private pages blocked.
+- Sitemap now includes product images. Product pages carry price, stock, shipping, return policy, ratings (real approved reviews), videos and colour/size data for Google.
+- **IndexNow** (optional): set `INDEXNOW_KEY` in Vercel. Saving a product in admin tells Bing instantly.
+
+**Marketing**
+- **Order source tracking:** links with `?utm_source=instagram&utm_medium=bio&utm_campaign=eid` (or Facebook/Google ad clicks) are remembered, and each order in admin shows "Came from".
+- **Flash sales:** in a product set Price (sale price), Old price (normal price) and "Sale ends". A countdown shows on the card and product page. When the time ends the price returns to the Old price on the website and in orders automatically.
+- **Badges** (New, Best seller, Limited, Hot, Eid special, Trending) on product cards.
+- **Free delivery above an amount:** set `NEXT_PUBLIC_FREE_SHIPPING_ABOVE` (with `NEXT_PUBLIC_SHIPPING_FEE`). The cart and checkout show a progress bar.
+- **WhatsApp offers opt-in** tick box at checkout (saved on the order, shown in admin).
+- **Sticky Order button** on phone product pages.
+- 4 new guides in the blog (voice search, shopping from reels, Google SEO checklist, marketing checklist).

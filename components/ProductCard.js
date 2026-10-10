@@ -4,6 +4,7 @@ import { formatPKR, discountPct } from '@/lib/format';
 import QuickAdd from './QuickAdd';
 import WishButton from './WishButton';
 import ShareMini from './ShareMini';
+import Countdown from './Countdown';
 
 export default function ProductCard({ p, priority = false }) {
   const off = discountPct(p.price, p.comparePrice);
@@ -19,6 +20,8 @@ export default function ProductCard({ p, priority = false }) {
             <div className="grid h-full place-items-center font-display text-3xl text-bronze">M</div>
           )}
           {!p.inStock && <span className="absolute bottom-2 left-2 rounded-md bg-cream/80 px-2 py-0.5 text-xs font-bold text-white">Sold out</span>}
+          {p.badge && off <= 0 && <span className="absolute left-2 top-2 rounded-md bg-saffron px-2 py-0.5 text-xs font-extrabold text-[#2B1B00]">{p.badge}</span>}
+          {p.badge && off > 0 && <span className="absolute left-2 top-9 rounded-md bg-saffron px-2 py-0.5 text-xs font-extrabold text-[#2B1B00]">{p.badge}</span>}
           {off > 0 && <span className="absolute left-2 top-2 rounded-md bg-red-600 px-2 py-0.5 text-xs font-extrabold text-white">-{off}%</span>}
         </div>
         <div className="p-3">
@@ -27,7 +30,7 @@ export default function ProductCard({ p, priority = false }) {
             <span className="text-base font-bold text-gold sm:text-lg">{formatPKR(p.price)}</span>
             {p.comparePrice > p.price && <span className="text-xs text-faint line-through">{formatPKR(p.comparePrice)}</span>}
           </p>
-          <p className="mt-1 text-[0.7rem] font-semibold text-gold">Cash on delivery</p>
+          {p.saleEndsAtMs ? <Countdown endsMs={p.saleEndsAtMs} compact /> : <p className="mt-1 text-[0.7rem] font-semibold text-gold">Cash on delivery</p>}
         </div>
       </Link>
       </div>

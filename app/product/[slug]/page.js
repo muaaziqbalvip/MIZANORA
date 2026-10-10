@@ -17,6 +17,8 @@ import { getReviews } from '@/lib/reviews';
 import Stars from '@/components/Stars';
 import ReviewForm from '@/components/ReviewForm';
 import RecentlyViewed from '@/components/RecentlyViewed';
+import Countdown from '@/components/Countdown';
+import StickyBuy from '@/components/StickyBuy';
 import JsonLd from '@/components/JsonLd';
 
 export const revalidate = 60;
@@ -108,8 +110,9 @@ export default async function ProductPage({ params }) {
               {p.comparePrice > p.price && <span className="text-lg text-faint line-through">{formatPKR(p.comparePrice)}</span>}
               {off > 0 && <span className="rounded-full bg-gold px-2.5 py-1 text-xs font-bold text-ink">Save {off}%</span>}
             </p>
-            <p className="mt-1 text-sm text-dim">{SITE.shippingFee > 0 ? `Delivery ${formatPKR(SITE.shippingFee)}` : 'Free delivery'} · Cash on delivery</p>
-            <ProductActions product={p} />
+            <p className="mt-1 text-sm text-dim">{SITE.shippingFee > 0 ? `Delivery ${formatPKR(SITE.shippingFee)}${SITE.freeShippingAbove > 0 ? `, free above ${formatPKR(SITE.freeShippingAbove)}` : ''}` : 'Free delivery'} · Cash on delivery</p>
+            {p.saleEndsAtMs > 0 && <div className="mt-3"><Countdown endsMs={p.saleEndsAtMs} /></div>}
+            <div id="buy-box"><ProductActions product={p} /></div>
             <ShareButtons url={url} title={p.name} />
             <ul className="mt-6 grid gap-2.5 rounded-2xl border border-line bg-surface p-4 text-sm text-dim">
               <li className="flex items-center gap-2.5"><Banknote size={18} className="text-gold" /> Pay cash when the parcel arrives</li>
@@ -143,6 +146,7 @@ export default async function ProductPage({ params }) {
         </section>
 
         <RecentlyViewed current={p.id} />
+        <StickyBuy name={p.name} price={p.price} hasOptions={p.options.length > 0} />
 
         {videos.length > 0 && (
           <section className="mt-10" aria-labelledby="vid">

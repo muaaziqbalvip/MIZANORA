@@ -12,6 +12,8 @@ import Footer from '@/components/Footer';
 import WhatsAppFab from '@/components/WhatsAppFab';
 import InstallBanner from '@/components/InstallBanner';
 import BottomNav from '@/components/BottomNav';
+import FeedbackLayer from '@/components/FeedbackLayer';
+import Attribution from '@/components/Attribution';
 import PwaRegister from '@/components/PwaRegister';
 import MetaPixel from '@/components/MetaPixel';
 import JsonLd from '@/components/JsonLd';
@@ -50,6 +52,11 @@ export default async function RootLayout({ children }) {
   const categories = await getCategories();
   return (
     <html lang="en-PK" className={`${display.variable} ${body.variable}`}>
+      <head>
+        <link rel="preconnect" href="https://i.ibb.co" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
+        <link rel="dns-prefetch" href="https://www.facebook.com" />
+      </head>
       <body>
         <AuthProvider>
         <CartProvider>
@@ -60,6 +67,8 @@ export default async function RootLayout({ children }) {
             <Footer categories={categories} />
             <WhatsAppFab />
             <BottomNav />
+            <FeedbackLayer />
+            <Attribution />
             <InstallBanner />
           </InstallProvider>
         </CartProvider>
