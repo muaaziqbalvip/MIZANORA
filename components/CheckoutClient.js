@@ -8,10 +8,8 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { authClient, dbClient } from '@/lib/firebase-client';
 import { useAuth } from './AuthProvider';
 import { rememberOrder } from '@/lib/orders-local';
-import { sfx } from '@/lib/sound';
 import { useCart } from './CartProvider';
-import { SITE, shippingFor, waLink } from '@/lib/config';
-import { readAttribution } from '@/lib/attribution';
+import { SITE, waLink } from '@/lib/config';
 import { CITIES, CITY_PROVINCE, PROVINCES } from '@/lib/constants';
 import { validateCustomer } from '@/lib/validate';
 import { formatPKR } from '@/lib/format';
@@ -31,7 +29,6 @@ export default function CheckoutClient() {
   const [addrs, setAddrs] = useState([]);
   const [pick, setPick] = useState('');
   const [saveAddr, setSaveAddr] = useState(true);
-  const [optIn, setOptIn] = useState(false);
   const [label, setLabel] = useState('Home');
   const [code, setCode] = useState('');
   const [coupon, setCoupon] = useState(null);
@@ -39,8 +36,8 @@ export default function CheckoutClient() {
   const fired = useRef(false);
   const formRef = useRef(null);
 
+  const shipping = items.length ? SITE.shippingFee : 0;
   const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
-  const shipping = items.length ? shippingFor(subtotal - discount) : 0;
   const total = subtotal - discount + shipping;
 
   // Returning customers: fill in the details they used last time (stored only on their own device).
@@ -79,7 +76,7 @@ export default function CheckoutClient() {
       const r = await fetch('/api/coupon', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, items: items.map((i) => ({ id: i.id, qty: i.qty })) }) });
       const d = await r.json().catch(() => ({}));
       if (!r.ok || !d.ok) { setCoupon(null); setCouponMsg(d.error || 'Could not apply this coupon.'); return; }
-      setCoupon(d); sfx.coupon(); setCouponMsg(`Coupon ${d.code} applied: ${d.label}.`);
+      setCoupon(d); setCouponMsg(`Coupon ${d.code} applied: ${d.label}.`);
     } catch { setCouponMsg('Could not check the coupon. Try again.'); }
   }
 
@@ -127,8 +124,6 @@ export default function CheckoutClient() {
         headers,
         body: JSON.stringify({
           coupon: coupon ? coupon.code : '',
-          marketingOptIn: optIn,
-          attribution: readAttribution(),
           customer: clean,
           items: items.map((i) => ({ id: i.id, size: i.size || '', qty: i.qty })),
           website: form.website, // honeypot: real people leave it empty
@@ -152,11 +147,9 @@ export default function CheckoutClient() {
           await setDoc(doc(dbClient(), 'users', user.uid), { addresses: next, ...(addrs.length ? {} : { defaultAddressId: rec.id }), updatedAtMs: Date.now() }, { merge: true });
         } catch (_) { /* the order is already placed; saving the address is optional */ }
       }
-      sfx.success();
       clear();
       router.push(`/thank-you?id=${encodeURIComponent(data.order.orderId)}`);
     } catch (err) {
-      sfx.error();
       setServerError(err.message);
       setPending(null);
       setBusy(false);
@@ -239,7 +232,6 @@ export default function CheckoutClient() {
             <select value={label} onChange={(e) => setLabel(e.target.value)} className="rounded-lg border border-line bg-white px-2 py-1"><option>Home</option><option>Work</option><option>Other</option></select>
           </div>
         )}
-        <label className="flex items-start gap-2.5 rounded-xl bg-raised p-3 text-sm"><input type="checkbox" checked={optIn} onChange={(e) => setOptIn(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#0B6B45]" /><span>Send me new offers and discounts on WhatsApp. <span className="text-faint">(Optional. You can stop any time.)</span></span></label>
         <div>
           <label htmlFor="notes" className="label">Order notes (optional)</label>
           <textarea id="notes" name="notes" rows={2} value={form.notes} onChange={set('notes')} className="input" placeholder="Anything we should know?" />
@@ -268,12 +260,6 @@ export default function CheckoutClient() {
             <div className="flex justify-between"><dt className="text-dim">Delivery</dt><dd>{shipping > 0 ? formatPKR(shipping) : 'Free'}</dd></div>
             <div className="flex justify-between text-base font-bold"><dt>Pay on delivery</dt><dd className="text-gold">{formatPKR(total)}</dd></div>
           </dl>
-          {SITE.freeShippingAbove > 0 && SITE.shippingFee > 0 && (
-            <div className="mt-4 rounded-xl bg-gold/10 p-3 text-xs">
-              {shipping === 0 ? <p className="font-bold text-gold">You get free delivery on this order.</p> : <p className="font-semibold text-dim">Add <b className="text-gold">{formatPKR(Math.max(0, SITE.freeShippingAbove - (subtotal - discount)))}</b> more for free delivery.</p>}
-              <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-white"><span className="block h-full rounded-full bg-gold transition-all" style={{ width: `${Math.min(100, Math.round(((subtotal - discount) / SITE.freeShippingAbove) * 100))}%` }} /></span>
-            </div>
-          )}
           <div className="mt-4 border-t border-line pt-3">
             <label htmlFor="cpn" className="label flex items-center gap-1.5"><Tag size={15} /> Coupon code</label>
             <div className="flex gap-2"><input id="cpn" className="input !py-2.5 uppercase" value={code} onChange={(e) => setCode(e.target.value)} placeholder="e.g. WELCOME10" /><button type="button" onClick={applyCoupon} disabled={!code.trim()} className="btn-ghost !px-4 !py-2.5 text-sm">Apply</button></div>

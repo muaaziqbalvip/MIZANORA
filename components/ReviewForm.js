@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { doc, setDoc } from 'firebase/firestore';
 import { Star } from 'lucide-react';
 import { dbClient } from '@/lib/firebase-client';
-import { sfx } from '@/lib/sound';
 import { useAuth } from './AuthProvider';
 
 export default function ReviewForm({ productId, productName }) {
@@ -24,7 +23,7 @@ export default function ReviewForm({ productId, productName }) {
       await setDoc(doc(dbClient(), 'reviews', `${user.uid}_${productId}`), {
         productId, productName, uid: user.uid, name: (user.displayName || 'Customer').slice(0, 40), rating, text: text.trim().slice(0, 600), approved: false, createdAtMs: Date.now(),
       });
-      sfx.success(); setMsg('Thank you! Your review will appear after we approve it.'); setText('');
+      setMsg('Thank you! Your review will appear after we approve it.'); setText('');
     } catch (e2) { setMsg(e2.code === 'permission-denied' ? 'You already reviewed this product, or review rules are not published yet.' : e2.message); }
     setBusy(false);
   }

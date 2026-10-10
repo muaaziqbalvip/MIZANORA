@@ -8,7 +8,7 @@ import { DEPARTMENTS } from '@/lib/departments';
 import { parseVideo } from '@/lib/video';
 import { optionsOf, optionsToText, templateFor, textToOptions, textToSpecs } from '@/lib/options';
 
-const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', badge: '', saleEnds: '', description: '', images: '', videos: '', options: '', specs: '', inStock: true, featured: false, active: true };
+const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', videos: '', options: '', specs: '', inStock: true, featured: false, active: true };
 const SAMPLE = {
   name: 'Tactical Boots', slug: 'tactical-boots', price: 3500, comparePrice: 0, category: 'Footwear',
   description: 'Lace-up, side-zip tactical boots in sand colour for work, hiking and everyday wear.\n\nEdit this text, the price and the photos in the admin panel.',
@@ -53,8 +53,7 @@ export default function AdminProducts() {
       const now = Date.now();
       const toArr = (v) => (Array.isArray(v) ? v : String(v || '').split(/[\n,]/)).map((x) => String(x).trim()).filter(Boolean);
       await setDoc(doc(dbClient(), 'products', slug), {
-        name: data.name.trim(), price, comparePrice: Number(data.comparePrice) || 0, category: (data.category || '').trim(), badge: String(data.badge || '').slice(0, 20),
-        saleEndsAtMs: data.saleEnds ? (new Date(data.saleEnds).getTime() || 0) : 0,
+        name: data.name.trim(), price, comparePrice: Number(data.comparePrice) || 0, category: (data.category || '').trim(),
         description: (data.description || '').trim(), images: toArr(data.images), videos: toArr(data.videos), options: textToOptions(data.options), sizes: [], specs: textToSpecs(data.specs),
         inStock: Boolean(data.inStock), featured: Boolean(data.featured), active: Boolean(data.active),
         createdAt: existing ? existing.createdAt || now : now, updatedAt: now,
@@ -69,7 +68,7 @@ export default function AdminProducts() {
 
   const edit = (p) => {
     setEditing(true);
-    setForm({ ...EMPTY, ...p, slug: p.id, price: p.price, comparePrice: p.comparePrice || '', saleEnds: p.saleEndsAtMs ? new Date(p.saleEndsAtMs - new Date(p.saleEndsAtMs).getTimezoneOffset() * 60000).toISOString().slice(0, 16) : '', images: (p.images || []).join('\n'), videos: (p.videos || []).join('\n'), options: optionsToText(optionsOf(p)), specs: (p.specs || []).join('\n') });
+    setForm({ ...EMPTY, ...p, slug: p.id, price: p.price, comparePrice: p.comparePrice || '', images: (p.images || []).join('\n'), videos: (p.videos || []).join('\n'), options: optionsToText(optionsOf(p)), specs: (p.specs || []).join('\n') });
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -116,11 +115,6 @@ export default function AdminProducts() {
           <div><label className="label" htmlFor="pp">Price (PKR)</label><input id="pp" type="number" min="1" className="input" value={form.price} onChange={set('price')} required /></div>
           <div><label className="label" htmlFor="pc">Old price</label><input id="pc" type="number" min="0" className="input" value={form.comparePrice} onChange={set('comparePrice')} /></div>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div><label className="label" htmlFor="pb">Badge on the card</label><select id="pb" className="input" value={form.badge} onChange={set('badge')}>{['', 'New', 'Best seller', 'Limited', 'Hot', 'Eid special', 'Trending'].map((b) => <option key={b} value={b}>{b || 'No badge'}</option>)}</select></div>
-          <div><label className="label" htmlFor="ps">Sale ends (optional)</label><input id="ps" type="datetime-local" className="input" value={form.saleEnds} onChange={set('saleEnds')} /></div>
-        </div>
-        <p className="-mt-1 text-xs text-faint">Flash sale: Price = sale price, Old price = normal price. A countdown shows until the end time, then the shop goes back to the Old price by itself.</p>
         <div><label className="label" htmlFor="pk">Category</label><input id="pk" list="cats" className="input" value={form.category} onChange={set('category')} placeholder="e.g. Footwear" /><datalist id="cats">{[...new Set([...(list || []).map((x) => x.category).filter(Boolean), ...DEPARTMENTS.map((d) => d.name)])].map((c) => <option key={c} value={c} />)}</datalist></div>
         <div><label className="label" htmlFor="pd">Description</label><textarea id="pd" rows={5} className="input" value={form.description} onChange={set('description')} /></div>
         <div>

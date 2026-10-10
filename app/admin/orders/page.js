@@ -109,8 +109,6 @@ export default function AdminOrders() {
                   <div className="rounded-xl bg-raised p-3 text-dim">
                     <p className="font-semibold text-cream">{o.customer?.name} · {o.customer?.phone}</p>
                     <p>{o.customer?.address}</p>
-                    {(o.attribution?.last?.source || o.attribution?.first?.source) && <p className="mt-1 text-xs font-semibold text-gold">Came from: {o.attribution.last?.source || o.attribution.first?.source}{(o.attribution.last?.medium || o.attribution.first?.medium) ? ` / ${o.attribution.last?.medium || o.attribution.first?.medium}` : ''}{(o.attribution.last?.campaign || o.attribution.first?.campaign) ? ` / ${o.attribution.last?.campaign || o.attribution.first?.campaign}` : ''}</p>}
-                    {o.marketingOptIn && <p className="text-xs font-semibold text-saffron">Agreed to receive offers on WhatsApp</p>}
                     <p>{o.customer?.city}, {o.customer?.province}</p>
                     <p>Landmark: {o.customer?.landmark}</p>
                     {o.customer?.notes && <p>Notes: {o.customer.notes}</p>}
