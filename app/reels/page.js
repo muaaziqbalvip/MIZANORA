@@ -4,7 +4,7 @@ import { PageHead } from '@/components/Prose';
 import ReelsRail from '@/components/ReelsRail';
 import Link from 'next/link';
 
-export const revalidate = 60;
+export const revalidate = 1800; // data comes from the shared cache; the admin panel refreshes pages instantly
 export const metadata = pageMeta({ title: 'Reels: Watch and Shop', description: 'Watch short videos of Mizanora products and shop them with one tap. Cash on delivery across Pakistan.', path: '/reels' });
 
 export default async function ReelsPage() {

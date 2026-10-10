@@ -18,7 +18,7 @@ import { DEPARTMENTS } from '@/lib/departments';
 import JsonLd from '@/components/JsonLd';
 import { SOCIAL_ICONS } from '@/components/Icons';
 
-export const revalidate = 60;
+export const revalidate = 1800; // data comes from the shared cache; the admin panel refreshes pages instantly
 
 export const metadata = pageMeta({
   title: { absolute: 'Mizanora | Online Market in Pakistan: Shop Fashion, Footwear, Gadgets & More, Cash on Delivery' },

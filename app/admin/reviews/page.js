@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { collection, deleteDoc, doc, getDocs, updateDoc } from 'firebase/firestore';
 import { dbClient } from '@/lib/firebase-client';
 import { formatDate } from '@/lib/format';
+import { revalidateSite } from '@/lib/admin-cache';
 import Stars from '@/components/Stars';
 
 export default function AdminReviews() {
@@ -13,6 +14,13 @@ export default function AdminReviews() {
     setList(snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0)));
   }, []);
   useEffect(() => { load().catch((e) => { setList([]); setErr(e.message); }); }, [load]);
+  // Update the list in memory (no full re-read) and refresh that product's public page.
+  const setApproved = (r, approved) => updateDoc(doc(dbClient(), 'reviews', r.id), { approved })
+    .then(() => { setList((cur) => cur.map((x) => (x.id === r.id ? { ...x, approved } : x))); return revalidateSite(r.productId); })
+    .catch((e) => setErr(e.message));
+  const removeReview = (r) => deleteDoc(doc(dbClient(), 'reviews', r.id))
+    .then(() => { setList((cur) => cur.filter((x) => x.id !== r.id)); return revalidateSite(r.productId); })
+    .catch((e) => setErr(e.message));
   if (!list) return <p className="text-dim">Loading...</p>;
   return (
     <div>
@@ -26,9 +34,9 @@ export default function AdminReviews() {
             <p className="mt-1 text-sm text-dim">{r.name} · {formatDate(r.createdAtMs)} · {r.approved ? <b className="text-gold">Published</b> : <b className="text-saffron">Waiting</b>}</p>
             <p className="mt-2 text-sm">{r.text}</p>
             <div className="mt-3 flex gap-3 text-sm font-semibold">
-              {!r.approved && <button className="text-gold" onClick={() => updateDoc(doc(dbClient(), 'reviews', r.id), { approved: true }).then(load)}>Approve</button>}
-              {r.approved && <button className="text-dim" onClick={() => updateDoc(doc(dbClient(), 'reviews', r.id), { approved: false }).then(load)}>Unpublish</button>}
-              <button className="text-red-700" onClick={() => { if (confirm('Delete this review?')) deleteDoc(doc(dbClient(), 'reviews', r.id)).then(load); }}>Delete</button>
+              {!r.approved && <button className="text-gold" onClick={() => setApproved(r, true)}>Approve</button>}
+              {r.approved && <button className="text-dim" onClick={() => setApproved(r, false)}>Unpublish</button>}
+              <button className="text-red-700" onClick={() => { if (confirm('Delete this review?')) removeReview(r); }}>Delete</button>
             </div>
           </li>
         ))}

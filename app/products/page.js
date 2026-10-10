@@ -6,7 +6,7 @@ import { PageHead } from '@/components/Prose';
 import ProductGrid from '@/components/ProductGrid';
 import JsonLd from '@/components/JsonLd';
 
-export const revalidate = 60;
+export const revalidate = 1800; // data comes from the shared cache; the admin panel refreshes pages instantly
 export const metadata = pageMeta({
   title: 'Products, Cash on Delivery in Pakistan',
   description: 'Browse all Mizanora products. Order online in Pakistan with cash on delivery. WhatsApp support available.',

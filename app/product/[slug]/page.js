@@ -19,7 +19,7 @@ import ReviewForm from '@/components/ReviewForm';
 import RecentlyViewed from '@/components/RecentlyViewed';
 import JsonLd from '@/components/JsonLd';
 
-export const revalidate = 60;
+export const revalidate = 1800; // data comes from the shared cache; the admin panel refreshes pages instantly
 export const dynamicParams = true; // new products work immediately, without a redeploy
 
 export async function generateStaticParams() {

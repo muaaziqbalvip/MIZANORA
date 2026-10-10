@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { authClient, dbClient } from '@/lib/firebase-client';
+import { revalidateSite } from '@/lib/admin-cache';
 import ImageUploader from '@/components/ImageUploader';
 
 const EMPTY = { id: '', image: '', title: '', subtitle: '', link: '/products', cta: 'Shop now', order: 1, active: true };
@@ -20,12 +21,7 @@ export default function AdminBanners() {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
-  async function revalidate() {
-    try {
-      const token = await authClient().currentUser.getIdToken();
-      await fetch('/api/revalidate', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: '{}' });
-    } catch (_) { /* the home page refreshes by itself within 5 minutes */ }
-  }
+  const revalidate = () => revalidateSite();
 
   async function save(e) {
     e.preventDefault();

@@ -26,11 +26,12 @@ export default function AdminOrders() {
   const [filter, setFilter] = useState('All');
   const [q, setQ] = useState('');
   const [open, setOpen] = useState('');
+  const [max, setMax] = useState(100); // newest 100 orders first; "Load more" adds 100 (each order read costs 1 Firestore read)
 
   useEffect(() => {
-    const qy = query(collection(dbClient(), 'orders'), orderBy('createdAtMs', 'desc'), limit(500));
+    const qy = query(collection(dbClient(), 'orders'), orderBy('createdAtMs', 'desc'), limit(max));
     return onSnapshot(qy, (snap) => setOrders(snap.docs.map((d) => ({ ...d.data(), orderId: d.id }))), (e) => setError(e.message));
-  }, []);
+  }, [max]);
 
   const shown = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -136,6 +137,7 @@ export default function AdminOrders() {
           );
         })}
       </ul>
+      {orders.length >= max && <button type="button" className="btn-ghost mt-4 w-full" onClick={() => setMax((m) => m + 100)}>Load 100 older orders</button>}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { GoogleAuthProvider, createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, signOut, updateProfile } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, query, setDoc, where } from 'firebase/firestore';
 import { BadgePercent, ChevronDown, ChevronUp, Heart, LogOut, MapPin, Package, Plus, RotateCcw, ShieldCheck, Star, Trash2, Truck, UserRound } from 'lucide-react';
 import { authClient, dbClient, firebaseConfigured } from '@/lib/firebase-client';
 import { explain, inAppBrowser } from '@/lib/authErrors';
@@ -194,7 +194,7 @@ function Orders({ user }) {
       return [...remote, ...mine].sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
     };
     if (!user) { setOrders(merge([])); return undefined; }
-    getDocs(query(collection(dbClient(), 'orders'), where('uid', '==', user.uid)))
+    getDocs(query(collection(dbClient(), 'orders'), where('uid', '==', user.uid), limit(30)))
       .then((snap) => live && setOrders(merge(snap.docs.map((d) => ({ ...d.data(), orderId: d.id })))))
       .catch((e) => { if (live) { setErr(e.code === 'permission-denied' ? 'Order history needs the updated Firestore rules (see SETUP.md).' : e.message); setOrders([]); } });
     return () => { live = false; };

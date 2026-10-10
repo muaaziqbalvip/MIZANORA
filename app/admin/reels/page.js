@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { dbClient } from '@/lib/firebase-client';
+import { readCache, writeCache, revalidateSite } from '@/lib/admin-cache';
 import { parseVideo } from '@/lib/video';
 
 const EMPTY = { id: '', url: '', title: '', productSlug: '', link: '', order: '', active: true };
@@ -14,9 +15,16 @@ export default function AdminReels() {
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
-    const [r, p] = await Promise.all([getDocs(collection(dbClient(), 'reels')), getDocs(collection(dbClient(), 'products'))]);
+    const r = await getDocs(collection(dbClient(), 'reels'));
     setList(r.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0)));
-    setProducts(p.docs.map((d) => ({ id: d.id, name: d.data().name })).sort((a, b) => String(a.name).localeCompare(String(b.name))));
+    // Product names for the dropdown: reuse the copy the Products page already loaded when there is one.
+    let prods = readCache('products');
+    if (!prods) {
+      const p = await getDocs(collection(dbClient(), 'products'));
+      prods = p.docs.map((d) => ({ id: d.id, ...d.data() }));
+      writeCache('products', prods);
+    }
+    setProducts(prods.map((x) => ({ id: x.id, name: x.name })).sort((a, b) => String(a.name).localeCompare(String(b.name))));
   }, []);
   useEffect(() => { load().catch((e) => { setList([]); setMsg(e.code === 'permission-denied' ? 'Publish the updated firestore.rules first (it adds the reels section).' : e.message); }); }, [load]);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
@@ -28,7 +36,7 @@ export default function AdminReels() {
     const id = form.id || Date.now().toString(36);
     try {
       await setDoc(doc(dbClient(), 'reels', id), { url: form.url.trim(), title: form.title.trim(), productSlug: form.productSlug, link: form.link.trim(), order: Number(form.order) || 0, active: Boolean(form.active), updatedAtMs: Date.now() });
-      setForm(EMPTY); setShow(false); setMsg('Reel saved. It appears on the home page and /reels within a minute.'); await load();
+      setForm(EMPTY); setShow(false); setMsg('Reel saved. It is live on the home page and /reels.'); await load(); await revalidateSite();
     } catch (e2) { setMsg(e2.message); }
   }
 
@@ -67,7 +75,7 @@ export default function AdminReels() {
                 <p className="truncate text-xs text-dim">{(parseVideo(r.url) || {}).label || 'Unsupported'} · {r.productSlug ? `Product: ${(products.find((p) => p.id === r.productSlug) || {}).name || r.productSlug}` : (r.link || 'All products')}</p>
               </div>
               <button className="btn-ghost !px-4 !py-2 text-sm" onClick={() => { setForm({ ...EMPTY, ...r, order: r.order || '' }); setShow(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Edit</button>
-              <button className="px-2 text-sm text-red-700" onClick={() => { if (confirm('Delete this reel?')) deleteDoc(doc(dbClient(), 'reels', r.id)).then(load); }}>Delete</button>
+              <button className="px-2 text-sm text-red-700" onClick={() => { if (confirm('Delete this reel?')) deleteDoc(doc(dbClient(), 'reels', r.id)).then(load).then(() => revalidateSite()); }}>Delete</button>
             </li>
           ))}
         </ul>

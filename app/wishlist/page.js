@@ -3,7 +3,7 @@ import { pageMeta } from '@/lib/seo';
 import { PageHead } from '@/components/Prose';
 import WishlistClient from '@/components/WishlistClient';
 
-export const revalidate = 60;
+export const revalidate = 1800; // data comes from the shared cache; the admin panel refreshes pages instantly
 export const metadata = pageMeta({ title: 'My wishlist', description: 'Products you saved on Mizanora.', path: '/wishlist', noindex: true });
 
 export default async function WishlistPage() {

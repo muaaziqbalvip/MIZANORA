@@ -6,6 +6,7 @@ import { formatPKR, slugify } from '@/lib/format';
 import ImageUploader from '@/components/ImageUploader';
 import { DEPARTMENTS } from '@/lib/departments';
 import { parseVideo } from '@/lib/video';
+import { readCache, writeCache, revalidateSite } from '@/lib/admin-cache';
 import { optionsOf, optionsToText, templateFor, textToOptions, textToSpecs } from '@/lib/options';
 
 const EMPTY = { name: '', slug: '', price: '', comparePrice: '', category: '', description: '', images: '', videos: '', options: '', specs: '', inStock: true, featured: false, active: true };
@@ -23,23 +24,26 @@ export default function AdminProducts() {
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const load = useCallback(async () => {
+  const byNew = (a, b) => (b.createdAt || 0) - (a.createdAt || 0);
+  // Reads Firestore only when there is no fresh copy in this browser session (or when you press Refresh).
+  const load = useCallback(async (force) => {
+    const hit = !force && readCache('products');
+    if (hit) { setList(hit); return; }
     const snap = await getDocs(collection(dbClient(), 'products'));
-    setList(snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)));
+    const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort(byNew);
+    writeCache('products', rows);
+    setList(rows);
   }, []);
   useEffect(() => { load().catch((e) => setMsg(e.message)); }, [load]);
+  // After a save/delete we update the list in memory instead of re-reading every product.
+  const patchList = (fn) => setList((cur) => { const next = fn(cur || []).sort(byNew); writeCache('products', next); return next; });
 
   const set = (k) => (e) => {
     const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setForm((f) => ({ ...f, [k]: v, ...(k === 'name' && !editing ? { slug: slugify(v) } : {}) }));
   };
 
-  async function revalidate(slug) {
-    try {
-      const token = await authClient().currentUser.getIdToken();
-      await fetch('/api/revalidate', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ slug }) });
-    } catch (_) { /* pages refresh by themselves within 5 minutes anyway */ }
-  }
+  const revalidate = revalidateSite;
 
   async function save(data, isNew) {
     const slug = slugify(data.slug || data.name);
@@ -52,16 +56,17 @@ export default function AdminProducts() {
       if (isNew && existing) { setMsg('A product with this slug already exists. Edit it from the list.'); setBusy(false); return; }
       const now = Date.now();
       const toArr = (v) => (Array.isArray(v) ? v : String(v || '').split(/[\n,]/)).map((x) => String(x).trim()).filter(Boolean);
-      await setDoc(doc(dbClient(), 'products', slug), {
+      const payload = {
         name: data.name.trim(), price, comparePrice: Number(data.comparePrice) || 0, category: (data.category || '').trim(),
         description: (data.description || '').trim(), images: toArr(data.images), videos: toArr(data.videos), options: textToOptions(data.options), sizes: [], specs: textToSpecs(data.specs),
         inStock: Boolean(data.inStock), featured: Boolean(data.featured), active: Boolean(data.active),
         createdAt: existing ? existing.createdAt || now : now, updatedAt: now,
-      });
+      };
+      await setDoc(doc(dbClient(), 'products', slug), payload);
+      patchList((cur) => [...cur.filter((x) => x.id !== slug), { id: slug, ...payload }]);
       await revalidate(slug);
-      setMsg(`Saved "${data.name}". It appears on the shop within a minute.`);
+      setMsg(`Saved "${data.name}". It is live on the shop now.`);
       setForm(EMPTY); setEditing(false); setShowForm(false);
-      await load();
     } catch (e) { setMsg(e && e.code === 'permission-denied' ? 'Permission denied: your account is not the admin in Firestore rules. Paste your UID/email in firestore.rules and click Publish.' : (e && e.message) || 'Could not save.'); }
     setBusy(false);
   }
@@ -74,7 +79,7 @@ export default function AdminProducts() {
   };
   async function remove(p) {
     if (!confirm(`Delete "${p.name}" permanently?`)) return;
-    await deleteDoc(doc(dbClient(), 'products', p.id)); await revalidate(p.id); await load();
+    await deleteDoc(doc(dbClient(), 'products', p.id)); patchList((cur) => cur.filter((x) => x.id !== p.id)); await revalidate(p.id);
   }
 
   return (
@@ -82,6 +87,7 @@ export default function AdminProducts() {
       <section className={`min-w-0 ${showForm ? 'hidden lg:block' : ''}`}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h1 className="text-3xl font-extrabold sm:text-4xl">Products</h1>
+          <button type="button" className="btn-ghost !px-3 !py-1.5 text-xs" onClick={() => load(true).catch((e) => setMsg(e.message))}>Refresh list</button>
           <button type="button" className="btn-gold !px-5 !py-2.5 lg:hidden" onClick={() => { setForm(EMPTY); setEditing(false); setShowForm(true); window.scrollTo({ top: 0 }); }}>+ Add product</button>
         </div>
         {msg && <p role="status" className="mb-3 rounded-xl bg-raised p-3 text-sm text-cream">{msg}</p>}
